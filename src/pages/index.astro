@@ -1,0 +1,140 @@
+---
+import '../styles/site.css';
+import EstamperDogfood from '../components/EstamperDogfood.astro';
+const demoStamp = 'stg-az-🍉-🛠️-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
+const features = ['ENV label', 'Cloud provider', 'Emoji tokens', 'Human words', 'Timestamp', 'GitHub actor', 'Commit hash', 'Dirty state', 'ASCII fallback', 'Copy on click', 'YAML config', 'GHA ready'];
+const integrations = ['JS', 'TS', 'Python', '.NET', 'Ruby', 'Vite', 'Webpack', 'Rollup', 'esbuild', 'Vercel', 'Netlify', 'GCP', 'Azure', 'AWS', 'Fly.io'];
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>estamper — know exactly which deploy is on screen</title>
+    <meta name="description" content="Estamper creates visible, human-friendly build stamps for web apps, QA screenshots, and deploy verification." />
+    <link rel="icon" href="/favicon.svg" />
+  </head>
+  <body>
+    <nav class="site-nav"><div class="container"><a class="logo" href="/">🍉 Estamper</a><div class="nav-links"><a href="/docs/">Docs</a><a href="/playground/">Playground</a><a href="/examples/">Examples</a><a href="/changelog/">Changelog</a><a href="https://github.com/roktiw/estamper-priv">GitHub</a></div></div></nav>
+    <main>
+      <section class="hero container">
+        <div class="eyebrow">Estamper logo</div>
+        <h1>Estamper</h1>
+        <p class="lede">Know exactly which deploy is on screen.</p>
+        <div class="stamp-card" aria-live="polite">
+          <code id="hero-stamp" class="stamp-output">{demoStamp}</code>
+          <button id="copy-stamp" class="button" type="button">Copy</button>
+        </div>
+        <div class="button-row">
+          <button id="toggle-mode" class="button primary" type="button">Switch to ASCII</button>
+          <a class="button" href="/playground/">Live demo</a>
+          <a class="button" href="https://github.com/roktiw/estamper-priv">GitHub</a>
+          <button class="button" type="button" data-copy="npm install -D estamper">npm install</button>
+        </div>
+      </section>
+
+      <section class="section container">
+        <h2>Stop guessing which build QA is seeing.</h2>
+        <div class="before-after">
+          <div class="code-card"><strong>BEFORE</strong><pre>QA: "Bug still here"
+Dev: "Which build?"
+QA: "No idea"
+Dev: ...</pre></div>
+          <div class="code-card"><strong>AFTER</strong><pre>Screenshot shows:
+🍉-🛠️-silver-river
+2026-06-28-14:02
+roktiw@a1b2c3d</pre></div>
+        </div>
+      </section>
+
+      <section class="section container">
+        <h2>How it works</h2>
+        <div class="grid">
+          <div class="card"><h3>1. Generate</h3><p><code>npx estamper generate</code></p></div>
+          <div class="card"><h3>2. Build</h3><p>The stamp lives in your app as JSON, JS, or HTML.</p></div>
+          <div class="card"><h3>3. See</h3><p>Every screenshot shows the exact deploy.</p></div>
+        </div>
+      </section>
+
+      <section class="section container">
+        <div class="card" style="text-align:center">
+          <p class="eyebrow">Dogfooded by default</p>
+          <h2>This website is stamped by Estamper.</h2>
+          <p>The production build generates <code>public/estamper.json</code> before Astro builds, then mounts the same copyable badge that Estamper users add to their apps.</p>
+          <pre>bunx estamper generate --config estamper.config.yml --out public/estamper.json</pre>
+          <button id="copy-site-stamp" class="button primary" type="button">Copy this site's stamp</button>
+        </div>
+      </section>
+
+      <section class="section container">
+        <h2>Everything a visible build stamp needs</h2>
+        <ul class="feature-list">{features.map((feature) => <li>✅ {feature}</li>)}</ul>
+      </section>
+
+      <section class="section container">
+        <h2>Install in seconds</h2>
+        <div class="grid">
+          <div class="code-card"><strong>npm</strong><pre>npm install -D estamper
+npx estamper init
+npx estamper generate</pre></div>
+          <div class="code-card"><strong>yarn</strong><pre>yarn add -D estamper
+yarn estamper init
+yarn estamper generate</pre></div>
+          <div class="code-card"><strong>pnpm</strong><pre>pnpm add -D estamper
+pnpm estamper init
+pnpm estamper generate</pre></div>
+          <div class="code-card"><strong>bun</strong><pre>bun add -d estamper
+bunx estamper init
+bunx estamper generate</pre></div>
+        </div>
+      </section>
+
+      <section class="section container">
+        <h2>Works with your stack</h2>
+        <ul class="feature-list">{integrations.map((integration) => <li>{integration}</li>)}</ul>
+      </section>
+
+      <section class="section container">
+        <div class="card" style="text-align:center">
+          <p class="eyebrow">Interactive builder</p>
+          <h2>Build your stamp ↗</h2>
+          <p>Try emoji/ascii modes, presets, YAML export, JSON export, snippets, and a browser badge preview.</p>
+          <a class="button primary" href="/playground/">Open playground</a>
+          <a class="button" href="/docs/getting-started/">Get started</a>
+        </div>
+      </section>
+
+      <section class="section container">
+        <blockquote class="card"><p>“Make the deploy visible. The fastest bug triage is the screenshot that already contains the build identity.”</p><footer>— Estamper</footer></blockquote>
+      </section>
+    </main>
+    <footer class="site-footer"><div class="container"><strong>estamper.dev</strong><div class="nav-links"><a href="https://github.com/roktiw/estamper-priv">GitHub</a><a href="https://www.npmjs.com/package/estamper">npm</a><a href="https://x.com/roktiw">Twitter/X</a><a href="/docs/">Docs</a></div><span>MIT License · made by roktiw</span></div></footer>
+    <EstamperDogfood />
+    <script>
+      const emojiStamp = 'stg-az-🍉-🛠️-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
+      const asciiStamp = 'stg-az-WM-TL-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
+      // Offset by 42 minutes so the animated demo stays visibly different from the static 14:02 examples.
+      const demoMinuteOffset = 42;
+      let emoji = true;
+      const stamp = document.querySelector('#hero-stamp');
+      const toggle = document.querySelector('#toggle-mode');
+      const copy = (text) => navigator.clipboard?.writeText(text).catch(() => undefined);
+      document.querySelector('#copy-stamp')?.addEventListener('click', () => copy(stamp?.textContent || emojiStamp));
+      document.querySelectorAll('[data-copy]').forEach((button) => button.addEventListener('click', () => copy(button.getAttribute('data-copy') || '')));
+      toggle?.addEventListener('click', () => {
+        emoji = !emoji;
+        if (stamp) stamp.textContent = emoji ? emojiStamp : asciiStamp;
+        toggle.textContent = emoji ? 'Switch to ASCII' : 'Switch to emoji';
+      });
+      const stampIntervalId = setInterval(() => {
+        if (!stamp) return;
+        const minute = String((new Date().getMinutes() + demoMinuteOffset) % 60).padStart(2, '0');
+        stamp.textContent = (emoji ? emojiStamp : asciiStamp).replace('14:02', `14:${minute}`);
+      }, 4000);
+      const clearStampInterval = () => clearInterval(stampIntervalId);
+      window.addEventListener('pagehide', clearStampInterval, { once: true });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) clearStampInterval();
+      }, { once: true });
+    </script>
+  </body>
+</html>

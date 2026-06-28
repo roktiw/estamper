@@ -15,9 +15,9 @@ export async function writeJs(path: string, stamp: StampResult): Promise<void> {
 export async function writeHtml(path: string, stamp: StampResult): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   const html = `<script type="module">
-  import { mountStampog } from './stampog-browser.js';
+  import { mountEstamper } from './estamper-browser.js';
 
-  mountStampog({
+  mountEstamper({
     stamp: ${JSON.stringify(stamp.stamp)}
   });
 </script>

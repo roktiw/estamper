@@ -1,5 +1,5 @@
-import { mountStampog } from '../../../dist/browser/index.js';
+import { mountEstamper } from '../../../dist/browser/index.js';
 
-mountStampog({
-  stamp: window.__STAMPOG__?.stamp ?? 'local-stampog-demo',
+mountEstamper({
+  stamp: window.__ESTAMPER__?.stamp ?? 'local-estamper-demo',
 });

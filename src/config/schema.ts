@@ -2,7 +2,7 @@ import type { StampogConfig } from './defaultConfig.js';
 import { validateFormat } from '../core/formatStamp.js';
 import { defaultEmojis, defaultWords } from '../core/defaults.js';
 
-const modes = new Set(['emoji', 'ascii', 'auto']);
+const modes = new Set(['emoji', 'ascii', 'mixed', 'auto']);
 const presets = new Set(['minimal', 'standard', 'verbose', 'games', 'ci', 'ascii', 'custom']);
 const positions = new Set(['top-left', 'top-right', 'bottom-left', 'bottom-right', 'inline', 'custom']);
 const themes = new Set(['auto', 'dark', 'light', 'minimal']);

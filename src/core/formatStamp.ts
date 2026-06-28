@@ -1,7 +1,8 @@
 import type { StampParts, TimezoneMode } from './types.js';
 
 const placeholders = new Set([
-  'env', 'cloud', 'token1', 'token2', 'token3', 'token4', 'emoji1', 'emoji2', 'ascii1', 'ascii2',
+  'env', 'envAscii', 'cloud', 'cloudAscii', 'token1', 'token2', 'token3', 'token4',
+  'emoji1', 'emoji2', 'emoji3', 'emoji4', 'ascii1', 'ascii2', 'ascii3', 'ascii4',
   'word1', 'word2', 'word3', 'word4', 'date', 'time', 'user', 'commit', 'branch', 'buildNumber', 'dirty',
 ]);
 
@@ -52,6 +53,12 @@ function dateParts(date: Date, timezone: TimezoneMode = 'local') {
 
 export function formatDate(date: Date, format = 'yyyy-mm-dd', timezone: TimezoneMode = 'local'): string {
   const part = dateParts(date, timezone);
+  const custom = () => format
+    .replaceAll('yyyy', String(part.year))
+    .replaceAll('yy', String(part.year).slice(-2))
+    .replaceAll('mm', pad(part.month))
+    .replaceAll('dd', pad(part.day))
+    .replaceAll('hh', pad(part.hour));
   switch (format) {
     case 'yy-mm-dd':
       return `${String(part.year).slice(-2)}-${pad(part.month)}-${pad(part.day)}`;
@@ -68,12 +75,16 @@ export function formatDate(date: Date, format = 'yyyy-mm-dd', timezone: Timezone
     case 'yyyy-mm-dd-hh:mm:ss':
       return `${part.year}-${pad(part.month)}-${pad(part.day)}-${pad(part.hour)}:${pad(part.minute)}:${pad(part.second)}`;
     default:
-      return `${part.year}-${pad(part.month)}-${pad(part.day)}`;
+      return custom();
   }
 }
 
 export function formatTime(date: Date, format = 'hh:mm', timezone: TimezoneMode = 'local'): string {
   const part = dateParts(date, timezone);
+  const custom = () => format
+    .replaceAll('hh', pad(part.hour))
+    .replaceAll('mm', pad(part.minute))
+    .replaceAll('ss', pad(part.second));
   switch (format) {
     case 'hh:mm:ss':
       return `${pad(part.hour)}:${pad(part.minute)}:${pad(part.second)}`;
@@ -84,8 +95,9 @@ export function formatTime(date: Date, format = 'hh:mm', timezone: TimezoneMode 
     case 'unix':
       return unixTime(date);
     case 'hh:mm':
-    default:
       return `${pad(part.hour)}:${pad(part.minute)}`;
+    default:
+      return custom();
   }
 }
 
@@ -108,5 +120,5 @@ export function formatStamp(format: string, parts: StampParts): string {
     .replace(/([/_.])-+/g, '$1')
     .replace(/(^-|-$)/g, '')
     .replace(/([@#~])-+/g, '$1')
-    .replace(/[@#~]$/g, '');
+    .replace(/[@#]$/g, '');
 }
