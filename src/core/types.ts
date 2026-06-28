@@ -1,4 +1,4 @@
-export type StampogMode = 'emoji' | 'ascii' | 'mixed' | 'auto';
+export type EstamperMode = 'emoji' | 'ascii' | 'mixed' | 'auto';
 
 export interface StampParts {
   env: string;
@@ -37,12 +37,13 @@ export interface StampResult {
 }
 
 export interface GenerateStampOptions {
-  mode?: StampogMode;
+  mode?: EstamperMode;
   env?: string;
   cloud?: string | false;
   words?: string[];
   emojis?: string[];
   ascii?: string[];
+  tokens?: string[];
   tokenCount?: number;
   wordCount?: number;
   user?: string;
@@ -58,7 +59,9 @@ export interface GenerateStampOptions {
   includeTime?: boolean;
   timeFormat?: string;
   timeTimezone?: 'local' | 'utc';
+  timezone?: 'local' | 'utc';
   seed?: string | number;
   format?: string;
   maxLength?: number;
+  emojiSupported?: boolean;
 }

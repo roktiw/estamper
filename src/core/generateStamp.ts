@@ -19,7 +19,7 @@ function cleanList(values: string[] | undefined, fallback: string[]): string[] {
     .filter(Boolean)
     .slice(0, 256);
   if (list.some((value) => value.length > 64)) {
-    throw new Error('Stampog token values must be 64 characters or shorter.');
+    throw new Error('Estamper token values must be 64 characters or shorter.');
   }
   return list;
 }
@@ -44,14 +44,20 @@ function assignIndexed(target: StampParts, prefix: string, values: string[]): vo
   });
 }
 
-function defaultStampFormat(mode: StampParts['mode'], hasCloud: boolean, hasTime: boolean): string {
-  const tokenFields = mode === 'ascii' ? ['{ascii1}', '{ascii2}'] : ['{token1}', '{token2}'];
+function resolveMode(options: GenerateStampOptions): StampParts['mode'] {
+  if (options.mode === 'ascii') return 'ascii';
+  if (options.mode === 'mixed') return 'mixed';
+  if (options.mode === 'auto' && options.emojiSupported === false) return 'ascii';
+  return 'emoji';
+}
+
+function defaultStampFormat(mode: StampParts['mode'], hasCloud: boolean, hasTime: boolean, tokenCount: number, wordCount: number): string {
+  const tokenPrefix = mode === 'ascii' ? 'ascii' : 'token';
   const fields = [
     mode === 'ascii' ? '{envAscii}' : '{env}',
     ...(hasCloud ? [mode === 'ascii' ? '{cloudAscii}' : '{cloud}'] : []),
-    ...tokenFields,
-    '{word1}',
-    '{word2}',
+    ...Array.from({ length: tokenCount }, (_value, index) => `{${tokenPrefix}${index + 1}}`),
+    ...Array.from({ length: wordCount }, (_value, index) => `{word${index + 1}}`),
     '{date}',
     ...(hasTime ? ['{time}'] : []),
     '{user}@{commit}',
@@ -59,26 +65,41 @@ function defaultStampFormat(mode: StampParts['mode'], hasCloud: boolean, hasTime
   return fields.join('-');
 }
 
+function resolveFormat(mode: StampParts['mode'], format: string): string {
+  const hasAsciiPlaceholder = /\{ascii\d+\}/.test(format);
+  const hasEmojiPlaceholder = /\{emoji\d+\}/.test(format);
+  if (mode === 'ascii' && !hasAsciiPlaceholder && hasEmojiPlaceholder) {
+    return format.replaceAll(/\{emoji(\d+)\}/g, '{ascii$1}');
+  }
+  return format;
+}
+
 export function generateStamp(options: GenerateStampOptions = {}): StampResult {
-  const mode: StampParts['mode'] = options.mode === 'ascii' ? 'ascii' : options.mode === 'mixed' ? 'mixed' : 'emoji';
+  const mode = resolveMode(options);
   const dirtyMarker = options.dirtyMarker ?? '~';
   const commitHash = options.commit?.trim() || '0000000';
   const commit = `${commitHash.slice(0, commitLength(options.commitLength))}${options.dirty ? dirtyMarker : ''}`;
   const picker = createPicker(options.seed ?? commitHash);
+  const tokenCount = count(options.tokenCount, 2);
+  const wordCount = count(options.wordCount, 2);
   const words = cleanList(options.words, defaultWords);
   const emojis = cleanList(options.emojis, defaultEmojis);
   const ascii = cleanList(options.ascii, defaultAscii);
-  const pickedWords = pickMany(words, count(options.wordCount, 2), picker);
-  const pickedEmojis = pickMany(emojis, count(options.tokenCount, 2), picker);
-  const pickedAscii = pickMany(ascii, count(options.tokenCount, 2), picker);
-  const tokens = pickedEmojis.map((emoji, index) => {
+  const tokenSource = cleanList(options.tokens, emojis);
+  const pickedWords = pickMany(words, wordCount, picker);
+  const pickedEmojis = pickMany(emojis, tokenCount, picker);
+  const pickedAscii = pickMany(ascii, tokenCount, picker);
+  const pickedTokens = pickMany(tokenSource, tokenCount, picker);
+  const tokens = pickedTokens.map((token, index) => {
     if (mode === 'ascii') return pickedAscii[index];
     if (mode === 'mixed' && index % 2 === 1) return pickedAscii[index];
-    return emoji;
+    return token;
   });
   const env = segment(options.env, 'dev', 4).toLowerCase();
   const cloud = options.cloud === false ? undefined : segment(options.cloud, 'loc', 4).toLowerCase();
   const date = options.date ?? new Date();
+  const dateTimezone = options.dateTimezone ?? options.timezone ?? 'local';
+  const timeTimezone = options.timeTimezone ?? options.timezone ?? 'local';
 
   const parts: StampParts = {
     env,
@@ -86,8 +107,8 @@ export function generateStamp(options: GenerateStampOptions = {}): StampResult {
     cloud,
     cloudAscii: cloud?.toUpperCase(),
     word1: pickedWords[0],
-    date: formatDate(date, options.dateFormat, options.dateTimezone),
-    time: options.includeTime === false ? undefined : formatTime(date, options.timeFormat, options.timeTimezone),
+    date: formatDate(date, options.dateFormat, dateTimezone),
+    time: options.includeTime === false ? undefined : formatTime(date, options.timeFormat, timeTimezone),
     user: segment(options.user, 'anonymous'),
     commit,
     branch: options.branch ? `${BRANCH_PREFIX}${segment(options.branch, '', 15)}` : undefined,
@@ -102,11 +123,11 @@ export function generateStamp(options: GenerateStampOptions = {}): StampResult {
   assignIndexed(parts, 'ascii', pickedAscii);
   assignIndexed(parts, 'token', tokens);
 
-  const fallbackFormat = defaultStampFormat(mode, Boolean(cloud), options.includeTime !== false);
-  const stamp = formatStamp(options.format ?? fallbackFormat, parts);
+  const fallbackFormat = defaultStampFormat(mode, Boolean(cloud), options.includeTime !== false, tokenCount, wordCount);
+  const stamp = formatStamp(resolveFormat(mode, options.format ?? fallbackFormat), parts);
   const maxLength = options.maxLength ?? MAX_STAMP_LENGTH;
   if (stamp.length > maxLength) {
-    throw new Error(`Stampog stamp is too long (${stamp.length}/${maxLength}).`);
+    throw new Error(`Estamper stamp is too long (${stamp.length}/${maxLength}).`);
   }
 
   return { stamp, parts };

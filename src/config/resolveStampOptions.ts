@@ -1,5 +1,5 @@
 import type { GenerateStampOptions } from '../core/types.js';
-import type { CloudConfig, EnvConfig, StampogConfig } from './defaultConfig.js';
+import type { CloudConfig, EnvConfig, EstamperConfig } from './defaultConfig.js';
 import type { GitInfo } from '../git/getGitInfo.js';
 
 const cloudEnvMap: Record<string, string> = {
@@ -14,14 +14,22 @@ const cloudEnvMap: Record<string, string> = {
   AWS_REGION: 'aws',
   AZURE_CLIENT_ID: 'az',
   AZURE_SUBSCRIPTION_ID: 'az',
+  ESTAMPER_CLOUD: 'loc',
 };
+
+function mapped(value: string | undefined, map: Record<string, string> | undefined, fallback: string | undefined): string | undefined {
+  const raw = value?.trim() || fallback;
+  return raw ? (map?.[raw] ?? raw) : undefined;
+}
 
 function envToken(config: string | EnvConfig, env: NodeJS.ProcessEnv): string {
   if (typeof config === 'string') return config;
-  if (config.auto) {
-    for (const source of config.sources ?? []) {
+  if (config.enabled === false) return config.fallback ?? 'dev';
+  if (config.value && config.value !== 'auto') return mapped(config.value, config.map, config.fallback) ?? 'dev';
+  if (config.auto || config.value === 'auto') {
+    for (const source of config.sources ?? ['ESTAMPER_ENV', 'VITE_ENV', 'NODE_ENV', 'DEPLOY_ENV']) {
       const value = env[source];
-      if (value) return config.map?.[value] ?? value;
+      if (value) return mapped(value, config.map, config.fallback) ?? value;
     }
   }
   return config.fallback ?? 'dev';
@@ -30,10 +38,11 @@ function envToken(config: string | EnvConfig, env: NodeJS.ProcessEnv): string {
 function cloudToken(config: string | CloudConfig, env: NodeJS.ProcessEnv): string | false {
   if (typeof config === 'string') return config;
   if (config.enabled === false) return false;
-  if (config.provider) return config.provider;
-  if (config.auto) {
-    for (const source of config.sources ?? []) {
-      if (env[source]) return cloudEnvMap[source] ?? source.toLowerCase();
+  if (config.provider && config.provider !== 'auto') return mapped(config.provider, config.map, config.fallback) ?? config.provider;
+  if (config.auto || config.provider === 'auto') {
+    for (const source of config.sources ?? ['ESTAMPER_CLOUD', 'VERCEL', 'NETLIFY', 'GITHUB_ACTIONS']) {
+      const value = env[source];
+      if (value) return mapped(source === 'ESTAMPER_CLOUD' ? value : cloudEnvMap[source], config.map, config.fallback) ?? value;
     }
   }
   return config.fallback ?? 'loc';
@@ -46,7 +55,7 @@ function withoutTimePlaceholder(format: string): string {
     .replace(/^-|-$/g, '');
 }
 
-function modeFormat(config: StampogConfig): string {
+function modeFormat(config: EstamperConfig): string {
   const format = config.time.enabled ? config.format : withoutTimePlaceholder(config.format);
   if (config.mode !== 'ascii') return format;
   return format
@@ -56,7 +65,7 @@ function modeFormat(config: StampogConfig): string {
 }
 
 export function resolveStampOptions(
-  config: StampogConfig,
+  config: EstamperConfig,
   git: GitInfo,
   seed?: string,
   env: NodeJS.ProcessEnv = process.env,
@@ -68,6 +77,7 @@ export function resolveStampOptions(
     words: config.words.allow,
     emojis: config.emojis.allow,
     ascii: config.ascii.allow,
+    tokens: config.tokens.enabled ? config.tokens.emoji?.allow : undefined,
     tokenCount: config.tokens.count,
     wordCount: config.words.count,
     format: modeFormat(config),

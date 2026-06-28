@@ -1,2 +1,2 @@
-export { copyStamp, mountStampog } from './mountStampog.js';
-export type { MountStampogOptions, StampogPosition } from './mountStampog.js';
+export { copyStamp, mountEstamper } from './mountEstamper.js';
+export type { MountEstamperOptions, EstamperPosition } from './mountEstamper.js';

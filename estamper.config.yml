@@ -1,0 +1,150 @@
+schemaVersion: 1
+name: estamper-www
+mode: auto
+preset: standard
+
+format: "{env}-{cloud}-{token1}-{token2}-{word1}-{word2}-{date}-{time}-{user}@{commit}"
+
+env:
+  enabled: true
+  value: auto
+  fallback: dev
+  map:
+    production: prd
+    preview: pre
+    development: dev
+
+cloud:
+  enabled: true
+  provider: auto
+  fallback: loc
+  map:
+    github-pages: ghp
+    vercel: vcl
+    netlify: ntl
+
+tokens:
+  enabled: true
+  count: 2
+  mode: auto
+  asciiLength: 2
+  emoji:
+    allow:
+      - 🏷️
+      - ✅
+      - 🔖
+      - 📌
+      - 🧾
+      - 🛠️
+      - 🚀
+      - 🧪
+  ascii:
+    allow:
+      - ST
+      - OK
+      - TAG
+      - PIN
+      - BLD
+      - DEP
+      - TL
+      - RX
+      - QA
+  mappings:
+    - emoji: 🏷️
+      ascii2: ST
+      ascii3: TAG
+      name: tag
+    - emoji: ✅
+      ascii2: OK
+      ascii3: CHK
+      name: check
+    - emoji: 🛠️
+      ascii2: TL
+      ascii3: TLS
+      name: tools
+    - emoji: 🚀
+      ascii2: RX
+      ascii3: RKT
+      name: rocket
+
+words:
+  enabled: true
+  count: 2
+  case: lower
+  output: full
+  allow:
+    - stamp
+    - seal
+    - mark
+    - badge
+    - build
+    - deploy
+    - release
+    - silver
+    - river
+    - pixel
+    - orbit
+    - rocket
+    - debug
+    - proof
+    - label
+  aliases:
+    - word: stamp
+      code2: ST
+      code3: STP
+    - word: seal
+      code2: SL
+      code3: SEL
+    - word: mark
+      code2: MK
+      code3: MRK
+    - word: badge
+      code2: BG
+      code3: BDG
+    - word: build
+      code2: BD
+      code3: BLD
+    - word: deploy
+      code2: DP
+      code3: DPL
+    - word: release
+      code2: RL
+      code3: REL
+
+date:
+  enabled: true
+  format: yyyy-mm-dd
+  timezone: utc
+
+time:
+  enabled: true
+  format: hh:mm
+  timezone: utc
+
+user:
+  enabled: true
+  source: auto
+  fallback: github-actions
+
+commit:
+  enabled: true
+  length: 7
+  prefix: "@"
+  includeDirty: true
+  dirtyMarker: "~"
+
+branch:
+  enabled: false
+
+buildNumber:
+  enabled: false
+
+badge:
+  enabled: true
+  position: bottom-right
+  theme: auto
+  copyOnClick: true
+  showDetailsOnClick: true
+
+output:
+  json: public/estamper.json

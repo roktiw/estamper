@@ -1,5 +1,6 @@
 ---
 import '../styles/site.css';
+import EstamperDogfood from '../components/EstamperDogfood.astro';
 const demoStamp = 'stg-az-🍉-🛠️-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
 const features = ['ENV label', 'Cloud provider', 'Emoji tokens', 'Human words', 'Timestamp', 'GitHub actor', 'Commit hash', 'Dirty state', 'ASCII fallback', 'Copy on click', 'YAML config', 'GHA ready'];
 const integrations = ['JS', 'TS', 'Python', '.NET', 'Ruby', 'Vite', 'Webpack', 'Rollup', 'esbuild', 'Vercel', 'Netlify', 'GCP', 'Azure', 'AWS', 'Fly.io'];
@@ -55,6 +56,16 @@ roktiw@a1b2c3d</pre></div>
       </section>
 
       <section class="section container">
+        <div class="card" style="text-align:center">
+          <p class="eyebrow">Dogfooded by default</p>
+          <h2>This website is stamped by Estamper.</h2>
+          <p>The production build generates <code>public/estamper.json</code> before Astro builds, then mounts the same copyable badge that Estamper users add to their apps.</p>
+          <pre>bunx estamper generate --config estamper.config.yml --out public/estamper.json</pre>
+          <button id="copy-site-stamp" class="button primary" type="button">Copy this site's stamp</button>
+        </div>
+      </section>
+
+      <section class="section container">
         <h2>Everything a visible build stamp needs</h2>
         <ul class="feature-list">{features.map((feature) => <li>✅ {feature}</li>)}</ul>
       </section>
@@ -88,6 +99,7 @@ bunx estamper generate</pre></div>
           <h2>Build your stamp ↗</h2>
           <p>Try emoji/ascii modes, presets, YAML export, JSON export, snippets, and a browser badge preview.</p>
           <a class="button primary" href="/playground/">Open playground</a>
+          <a class="button" href="/docs/getting-started/">Get started</a>
         </div>
       </section>
 
@@ -96,9 +108,12 @@ bunx estamper generate</pre></div>
       </section>
     </main>
     <footer class="site-footer"><div class="container"><strong>estamper.dev</strong><div class="nav-links"><a href="https://github.com/roktiw/estamper-priv">GitHub</a><a href="https://www.npmjs.com/package/estamper">npm</a><a href="https://x.com/roktiw">Twitter/X</a><a href="/docs/">Docs</a></div><span>MIT License · made by roktiw</span></div></footer>
+    <EstamperDogfood />
     <script>
       const emojiStamp = 'stg-az-🍉-🛠️-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
       const asciiStamp = 'stg-az-WM-TL-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
+      // Offset by 42 minutes so the animated demo stays visibly different from the static 14:02 examples.
+      const demoMinuteOffset = 42;
       let emoji = true;
       const stamp = document.querySelector('#hero-stamp');
       const toggle = document.querySelector('#toggle-mode');
@@ -110,11 +125,16 @@ bunx estamper generate</pre></div>
         if (stamp) stamp.textContent = emoji ? emojiStamp : asciiStamp;
         toggle.textContent = emoji ? 'Switch to ASCII' : 'Switch to emoji';
       });
-      setInterval(() => {
+      const stampIntervalId = setInterval(() => {
         if (!stamp) return;
-        const minute = String((new Date().getMinutes() + 42) % 60).padStart(2, '0');
+        const minute = String((new Date().getMinutes() + demoMinuteOffset) % 60).padStart(2, '0');
         stamp.textContent = (emoji ? emojiStamp : asciiStamp).replace('14:02', `14:${minute}`);
       }, 4000);
+      const clearStampInterval = () => clearInterval(stampIntervalId);
+      window.addEventListener('pagehide', clearStampInterval, { once: true });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) clearStampInterval();
+      }, { once: true });
     </script>
   </body>
 </html>

@@ -22,6 +22,7 @@ export default defineConfig({
           label: '⚙️ Configuration',
           items: [
             { label: 'estamper.config.yml', link: '/docs/config/' },
+            { label: 'YAML contracts', link: '/docs/yaml-contracts/' },
             { label: 'Presets', link: '/docs/presets/' },
           ],
         },
@@ -46,15 +47,26 @@ export default defineConfig({
           items: [
             { label: 'GitHub Actions', link: '/docs/github-actions/' },
             { label: 'Vite plugin', link: '/docs/vite-plugin/' },
+            { label: 'Integrations', link: '/docs/integrations/' },
           ],
         },
         {
           label: '🔌 API Reference',
-          items: [{ label: 'API', link: '/docs/api/' }],
+          items: [
+            { label: 'API', link: '/docs/api/' },
+            { label: 'FAQ', link: '/docs/faq/' },
+          ],
         },
       ],
     }),
   ],
+  redirects: {
+    '/install': '/docs/getting-started/',
+    '/configuration': '/docs/config/',
+    '/config': '/docs/config/',
+    '/gha': '/docs/github-actions/',
+    '/github-actions': '/docs/github-actions/',
+  },
   markdown: {
     shikiConfig: {
       themes: {

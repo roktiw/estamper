@@ -1,0 +1,5 @@
+schemaVersion: 1
+name: estamper
+mode: auto
+preset: standard
+format: "{env}-{cloud}-{token1}-{token2}-{word1}-{word2}-{date}-{time}-{user}@{commit}"

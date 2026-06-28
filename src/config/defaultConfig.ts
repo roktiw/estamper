@@ -1,7 +1,9 @@
 import { defaultAscii, defaultEmojis, defaultFormat, defaultWords } from '../core/defaults.js';
-import type { StampogMode } from '../core/types.js';
+import type { EstamperMode } from '../core/types.js';
 
 export interface EnvConfig {
+  enabled?: boolean;
+  value?: string;
   auto?: boolean;
   sources?: string[];
   map?: Record<string, string>;
@@ -13,17 +15,26 @@ export interface CloudConfig {
   provider?: string;
   auto?: boolean;
   sources?: string[];
+  map?: Record<string, string>;
   fallback?: string;
 }
 
-export interface StampogConfig {
+export interface EstamperConfig {
+  schemaVersion?: number;
   name: string;
-  mode: StampogMode;
+  mode: EstamperMode;
+  preset?: string;
   format: string;
   env: string | EnvConfig;
   cloud: string | CloudConfig;
   tokens: {
+    enabled?: boolean;
     count: number;
+    mode?: string;
+    asciiLength?: number;
+    emoji?: { allow?: string[] };
+    ascii?: { allow?: string[] };
+    mappings?: unknown[];
   };
   date: {
     format: string;
@@ -37,6 +48,9 @@ export interface StampogConfig {
   words: {
     count: number;
     allow: string[];
+    case?: string;
+    output?: string;
+    aliases?: unknown[];
   };
   emojis: {
     allow: string[];
@@ -54,11 +68,11 @@ export interface StampogConfig {
   };
   badge: {
     enabled: boolean;
-    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'custom';
     startVisible: boolean;
     copyOnClick: boolean;
     showDetailsOnClick: boolean;
-    theme: 'light' | 'dark';
+    theme: 'light' | 'dark' | 'auto';
   };
   output: {
     json: string;
@@ -67,15 +81,19 @@ export interface StampogConfig {
   };
 }
 
-export const defaultConfig: StampogConfig = {
-  name: 'stampog',
+export const defaultConfig: EstamperConfig = {
+  schemaVersion: 1,
+  name: 'estamper',
   mode: 'emoji',
   format: defaultFormat,
   env: {
+    enabled: true,
+    value: 'auto',
     auto: true,
-    sources: ['VITE_ENV', 'NODE_ENV', 'DEPLOY_ENV'],
+    sources: ['VITE_ENV', 'NODE_ENV', 'DEPLOY_ENV', 'ESTAMPER_ENV'],
     map: {
       production: 'prd',
+      preview: 'pre',
       staging: 'stg',
       development: 'dev',
       test: 'tst',
@@ -84,6 +102,7 @@ export const defaultConfig: StampogConfig = {
   },
   cloud: {
     enabled: true,
+    provider: 'auto',
     auto: true,
     sources: [
       'VERCEL',
@@ -97,11 +116,34 @@ export const defaultConfig: StampogConfig = {
       'AWS_REGION',
       'AZURE_CLIENT_ID',
       'AZURE_SUBSCRIPTION_ID',
+      'ESTAMPER_CLOUD',
     ],
+    map: {
+      'github-pages': 'ghp',
+      vercel: 'vcl',
+      netlify: 'ntl',
+      railway: 'rwy',
+      fly: 'fly',
+      render: 'rndr',
+      cloudflare: 'cfp',
+      gcp: 'gcp',
+      aws: 'aws',
+      azure: 'az',
+    },
     fallback: 'loc',
   },
   tokens: {
+    enabled: true,
     count: 2,
+    mode: 'auto',
+    asciiLength: 2,
+    emoji: {
+      allow: defaultEmojis,
+    },
+    ascii: {
+      allow: defaultAscii,
+    },
+    mappings: [],
   },
   date: {
     format: 'yyyy-mm-dd',
@@ -139,8 +181,8 @@ export const defaultConfig: StampogConfig = {
     theme: 'dark',
   },
   output: {
-    json: 'dist/stampog.json',
-    js: 'dist/stampog.js',
-    htmlSnippet: 'dist/stampog-snippet.html',
+    json: 'dist/estamper.json',
+    js: 'dist/estamper.js',
+    htmlSnippet: 'dist/estamper-snippet.html',
   },
 };
