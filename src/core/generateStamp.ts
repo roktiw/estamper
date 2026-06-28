@@ -11,7 +11,7 @@ function cleanList(values: string[] | undefined, fallback: string[]): string[] {
     .filter(Boolean)
     .slice(0, 256);
   if (list.some((value) => value.length > 64)) {
-    throw new Error('Stampog token values must be 64 characters or shorter.');
+    throw new Error('Estamper token values must be 64 characters or shorter.');
   }
   return list;
 }
@@ -25,7 +25,8 @@ function resolveMode(options: GenerateStampOptions): StampParts['mode'] {
 function resolveFormat(mode: StampParts['mode'], format?: string): string {
   if (!format) return mode === 'ascii' ? asciiFormat : defaultFormat;
   const hasAsciiPlaceholder = format.includes('{ascii1}') || format.includes('{ascii2}');
-  if (mode === 'ascii' && !hasAsciiPlaceholder && format.includes('{emoji')) {
+  const hasEmojiPlaceholder = format.includes('{emoji1}') || format.includes('{emoji2}');
+  if (mode === 'ascii' && !hasAsciiPlaceholder && hasEmojiPlaceholder) {
     return format.replaceAll('{emoji1}', '{ascii1}').replaceAll('{emoji2}', '{ascii2}');
   }
   return format;
@@ -59,7 +60,7 @@ export function generateStamp(options: GenerateStampOptions = {}): StampResult {
   const stamp = formatStamp(resolveFormat(mode, options.format), parts);
   const maxLength = options.maxLength ?? MAX_STAMP_LENGTH;
   if (stamp.length > maxLength) {
-    throw new Error(`Stampog stamp is too long (${stamp.length}/${maxLength}).`);
+    throw new Error(`Estamper stamp is too long (${stamp.length}/${maxLength}).`);
   }
 
   return { stamp, parts };

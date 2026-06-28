@@ -111,6 +111,7 @@ bunx estamper generate</pre></div>
     <script>
       const emojiStamp = 'stg-az-🍉-🛠️-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
       const asciiStamp = 'stg-az-WM-TL-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
+      const DEMO_MINUTE_DISPLAY_OFFSET = 42;
       let emoji = true;
       const stamp = document.querySelector('#hero-stamp');
       const toggle = document.querySelector('#toggle-mode');
@@ -122,11 +123,16 @@ bunx estamper generate</pre></div>
         if (stamp) stamp.textContent = emoji ? emojiStamp : asciiStamp;
         toggle.textContent = emoji ? 'Switch to ASCII' : 'Switch to emoji';
       });
-      setInterval(() => {
+      const stampIntervalId = setInterval(() => {
         if (!stamp) return;
-        const minute = String((new Date().getMinutes() + 42) % 60).padStart(2, '0');
+        const minute = String((new Date().getMinutes() + DEMO_MINUTE_DISPLAY_OFFSET) % 60).padStart(2, '0');
         stamp.textContent = (emoji ? emojiStamp : asciiStamp).replace('14:02', `14:${minute}`);
       }, 4000);
+      const clearStampInterval = () => clearInterval(stampIntervalId);
+      window.addEventListener('pagehide', clearStampInterval, { once: true });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) clearStampInterval();
+      }, { once: true });
     </script>
   </body>
 </html>

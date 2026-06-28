@@ -1,4 +1,4 @@
-export type StampogMode = 'emoji' | 'ascii' | 'auto';
+export type EstamperMode = 'emoji' | 'ascii' | 'auto';
 
 export interface StampParts {
   emoji1?: string;
@@ -21,7 +21,7 @@ export interface StampResult {
 }
 
 export interface GenerateStampOptions {
-  mode?: StampogMode;
+  mode?: EstamperMode;
   words?: string[];
   emojis?: string[];
   ascii?: string[];

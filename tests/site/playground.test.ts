@@ -30,6 +30,8 @@ describe('website playground helpers', () => {
   it('respects token, word, and commit length controls', () => {
     const stamp = buildPlaygroundStamp({
       ...defaultPlaygroundConfig,
+      emojis: ['🍉'],
+      words: ['silver'],
       tokenCount: 1,
       wordCount: 1,
       commit: 'a1b2c3d4e5f6',

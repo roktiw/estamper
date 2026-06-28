@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Stampog Config Panel</title>
+    <title>Estamper Config Panel</title>
     <style>
       body { font-family: system-ui, sans-serif; max-width: 900px; margin: 32px auto; padding: 0 16px; }
       label { display: block; margin: 12px 0; }
@@ -13,7 +13,7 @@
     </style>
   </head>
   <body>
-    <h1>Stampog Config Panel</h1>
+    <h1>Estamper Config Panel</h1>
     <label>Mode <select id="mode"><option>emoji</option><option>ascii</option><option>auto</option></select></label>
     <label>Format <input id="format" value="{emoji1}-{emoji2}-{word1}-{word2}-{date}-{user}@{commit}"></label>
     <label>Words <textarea id="words">silver
@@ -52,7 +52,7 @@ QA</textarea></label>
       let seed = 1;
       const pick = (items) => items[seed++ % items.length] || '';
       const config = () => ({
-        name: 'stampog',
+        name: 'estamper',
         mode: $('mode').value,
         format: $('format').value,
         words: { allow: list('words') },
@@ -96,7 +96,7 @@ QA</textarea></label>
       $('downloadYaml').addEventListener('click', () => {
         const link = document.createElement('a');
         link.href = URL.createObjectURL(new Blob([$('yaml').textContent], { type: 'text/yaml' }));
-        link.download = 'stampog.config.yml';
+        link.download = 'estamper.config.yml';
         link.click();
       });
       render();

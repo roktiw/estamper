@@ -1,4 +1,4 @@
-name: Generate Stampog Build Stamp
+name: Generate Estamper Build Stamp
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  stampog:
+  estamper:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -16,11 +16,11 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - name: Generate Stampog stamp
-        run: npx stampog generate --config stampog.config.yml --out public/stampog.json
+      - name: Generate Estamper stamp
+        run: npx estamper generate --config estamper.config.yml --out public/estamper.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v4
         with:
-          name: stampog
-          path: public/stampog.json
+          name: estamper
+          path: public/estamper.json

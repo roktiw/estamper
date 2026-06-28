@@ -1,4 +1,4 @@
-name: Deploy GitHub Pages With Stampog
+name: Deploy GitHub Pages With Estamper
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npx stampog generate --out public/stampog.json
+      - run: npx estamper generate --out public/estamper.json
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

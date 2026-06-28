@@ -17,15 +17,15 @@ function has(args: string[], name: string): boolean {
 }
 
 function help(): void {
-  console.log(`Stampog
+  console.log(`Estamper
 
 Usage:
-  stampog init
-  stampog generate [--config stampog.config.yml] [--out public/stampog.json] [--js dist/stampog.js] [--html dist/stampog.html] [--seed value]
-  stampog print [--config stampog.config.yml]
-  stampog json [--config stampog.config.yml]
-  stampog html --out public/stampog.html
-  stampog validate-config [--config stampog.config.yml]
+  estamper init
+  estamper generate [--config estamper.config.yml] [--out public/estamper.json] [--js dist/estamper.js] [--html dist/estamper.html] [--seed value]
+  estamper print [--config estamper.config.yml]
+  estamper json [--config estamper.config.yml]
+  estamper html --out public/estamper.html
+  estamper validate-config [--config estamper.config.yml]
 `);
 }
 
@@ -55,7 +55,7 @@ async function main(args: string[]): Promise<void> {
   }
 
   if (command === 'init') {
-    const out = argValue(args, '--out') ?? 'stampog.config.yml';
+    const out = argValue(args, '--out') ?? 'estamper.config.yml';
     await writeFile(out, YAML.stringify(defaultConfig), { flag: has(args, '--force') ? 'w' : 'wx' });
     console.log(`Created ${out}`);
     return;
@@ -63,7 +63,7 @@ async function main(args: string[]): Promise<void> {
 
   if (command === 'validate-config') {
     await loadConfig(argValue(args, '--config'));
-    console.log('Stampog config is valid.');
+    console.log('Estamper config is valid.');
     return;
   }
 
@@ -77,11 +77,11 @@ async function main(args: string[]): Promise<void> {
     return;
   }
   if (command === 'html') {
-    await writeHtml(argValue(args, '--out') ?? 'dist/stampog-snippet.html', stamp);
+    await writeHtml(argValue(args, '--out') ?? 'dist/estamper-snippet.html', stamp);
     return;
   }
   if (command === 'generate') {
-    await writeJson(argValue(args, '--out') ?? 'dist/stampog.json', stamp);
+    await writeJson(argValue(args, '--out') ?? 'dist/estamper.json', stamp);
     if (argValue(args, '--js')) await writeJs(argValue(args, '--js')!, stamp);
     if (argValue(args, '--html')) await writeHtml(argValue(args, '--html')!, stamp);
     console.log(stamp.stamp);
