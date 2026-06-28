@@ -1,66 +1,108 @@
-name: estamper
-mode: emoji
-format: "{emoji1}-{emoji2}-{word1}-{word2}-{date}-{user}@{commit}"
+schemaVersion: 1
+name: estamper-www
+mode: auto
+preset: standard
 
-date:
-  format: "yyyy-mm-dd-hh:mm:ss"
-  timezone: "local"
+format: "{env}-{cloud}-{token1}-{token2}-{word1}-{word2}-{date}-{time}-{user}@{commit}"
+
+env:
+  enabled: true
+  value: auto
+  fallback: dev
+
+cloud:
+  enabled: true
+  provider: auto
+  fallback: ghp
+
+tokens:
+  enabled: true
+  count: 2
+  mode: auto
+  asciiLength: 2
+  emoji:
+    allow:
+      - 🏷️
+      - ✅
+      - 🛠️
+      - 🚀
+      - 🧪
+  ascii:
+    allow:
+      - ST
+      - OK
+      - TL
+      - RX
+      - QA
+  mappings:
+    - emoji: 🏷️
+      ascii2: ST
+      ascii3: TAG
+      name: tag
+    - emoji: ✅
+      ascii2: OK
+      ascii3: CHK
+      name: check
 
 words:
+  enabled: true
+  count: 2
+  case: lower
+  output: full
   allow:
+    - stamp
+    - seal
+    - mark
+    - badge
+    - build
+    - deploy
+    - release
     - silver
     - river
-    - melon
-    - orbit
     - pixel
-    - debug
-    - rocket
-    - garden
-    - banana
-    - arcade
+    - orbit
+  aliases:
+    - word: stamp
+      code2: ST
+      code3: STP
+    - word: seal
+      code2: SL
+      code3: SEL
+    - word: badge
+      code2: BG
+      code3: BDG
+    - word: build
+      code2: BD
+      code3: BLD
 
-emojis:
-  allow:
-    - 🍉
-    - 🛠️
-    - 🚀
-    - 🐶
-    - 🍏
-    - 🍌
-    - 🧪
-    - 🎮
-    - ✨
-    - 🧰
+date:
+  enabled: true
+  format: yyyy-mm-dd
+  timezone: utc
 
-ascii:
-  allow:
-    - WM
-    - TL
-    - RX
-    - DG
-    - PX
-    - QA
-    - CI
-    - GH
-    - JS
-    - OK
+time:
+  enabled: true
+  format: hh:mm
+  timezone: utc
 
-git:
-  commitLength: 7
-  includeBranch: true
+user:
+  enabled: true
+  source: auto
+  fallback: github-actions
+
+commit:
+  enabled: true
+  length: 7
+  prefix: "@"
   includeDirty: true
-  usernameSource: github
-  fallbackUsernameSource: git-config
+  dirtyMarker: "~"
 
 badge:
   enabled: true
   position: bottom-right
-  startVisible: true
+  theme: auto
   copyOnClick: true
   showDetailsOnClick: true
-  theme: dark
 
 output:
-  json: "dist/estamper.json"
-  js: "dist/estamper.js"
-  htmlSnippet: "dist/estamper-snippet.html"
+  json: public/estamper.json

@@ -22,6 +22,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "check": "tsc --noEmit",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "prepack": "npm run build",

@@ -20,6 +20,20 @@ npx estamper init
 npx estamper generate --out public/estamper.json
 ```
 
+## Website
+
+The documentation site is an Astro app with a custom landing page at `/`, Starlight docs under `/docs`, an interactive playground at `/playground`, examples at `/examples`, changelog at `/changelog`, and LLM-first text files at `/llms.txt` and `/llms-full.txt`.
+
+```bash
+npm ci
+npm run site:dev
+npm run check
+npm test
+npm run site:build
+```
+
+The site dogfoods Estamper with `estamper.config.yml` and `public/estamper.json`; deploy workflows regenerate that file before building.
+
 ```js
 import { mountEstamper } from 'estamper/browser';
 import stamp from './estamper.json' assert { type: 'json' };
