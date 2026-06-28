@@ -72,13 +72,31 @@ The default config lives in `estamper.config.yml`. YAML and JSON config files ar
 Important fields:
 
 - `mode`: `emoji`, `ascii`, or `auto`
-- `format`: token template, e.g. `{emoji1}-{emoji2}-{word1}-{word2}-{date}-{user}@{commit}`
-- `words.allow`, `emojis.allow`, `ascii.allow`: dictionaries used by the generator
-- `git.commitLength`: short commit length
-- `badge.position`: `top-left`, `top-right`, `bottom-left`, `bottom-right`
-- `output`: default output paths
+- `preset`: `minimal`, `standard`, `verbose`, `games`, `ci`, `ascii`, or `custom`
+- `format`: token template, e.g. `{env}-{cloud}-{token1}-{token2}-{word1}-{word2}-{date}-{time}-{user}@{commit}`
+- `tokens.emoji.allow`, `tokens.ascii.allow`, `tokens.mappings`: emoji/ASCII dictionaries and emoji-to-ASCII mappings
+- `tokens.asciiLength`: `2` or `3` for mapped ASCII replacements
+- `words.allow`, `words.deny`, `words.aliases`, `words.case`: word dictionaries and `code2`/`code3` compact output
+- `env` and `cloud`: auto-detected deployment tokens with configurable maps/fallbacks
+- `date`, `time`, `user`, `commit`, `branch`, `buildNumber`: build metadata segments
+- `badge`: render position/theme/click behavior
+- `output`: JSON, ESM, HTML snippet, optional CSS, and meta output targets
+- `validation`: max stamp length and strictness settings
 
 Config is validated with clear errors and capped token lists to avoid oversized output.
+The default config file is `estamper.config.yml`; `stampog.config.yml` remains readable for older projects.
+
+Supported placeholders are `{env}`, `{cloud}`, `{token1}`–`{token4}`, `{word1}`–`{word4}`, `{date}`, `{time}`, `{user}`, `{commit}`, `{branch}`, `{buildNumber}`, and `{dirty}`. Literal `@`, `#`, and `~` are supported in formats.
+
+Preset formats:
+
+- `minimal`: env, two words, date, user, commit
+- `standard`: env, cloud, two tokens, two words, date/time, user, commit
+- `verbose`: standard plus dirty, branch, and build number segments
+- `games`: two tokens, two words, compact time, user, commit
+- `ci`: env, cloud, tokens, date/time, user, commit, build number
+- `ascii`: standard layout intended for ASCII mode
+- `custom`: use the provided `format` unchanged
 
 ## Browser badge
 

@@ -1,10 +1,11 @@
 {
-  "name": "stampog",
+  "name": "estamper",
   "version": "0.1.0",
   "description": "Human-friendly build/version stamps for web apps and games.",
   "type": "module",
   "license": "MIT",
   "bin": {
+    "estamper": "./dist/cli/index.js",
     "stampog": "./dist/cli/index.js"
   },
   "exports": {
@@ -15,6 +16,7 @@
   },
   "files": [
     "dist",
+    "estamper.config.yml",
     "stampog.config.yml",
     "README.md",
     "LICENSE",

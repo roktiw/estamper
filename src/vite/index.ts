@@ -18,17 +18,24 @@ export function stampogVitePlugin(options: StampogVitePluginOptions = {}) {
     name: 'stampog',
     async buildStart() {
       const config = await loadConfig(options.config);
-      const git = getGitInfo(config.git.commitLength);
+      const git = getGitInfo(config.commit.length);
       const result = generateStamp({
         mode: config.mode,
         words: config.words.allow,
-        emojis: config.emojis.allow,
-        ascii: config.ascii.allow,
+        emojis: config.tokens.emoji.allow,
+        ascii: config.tokens.ascii.allow,
+        tokenMappings: config.tokens.mappings,
+        tokenCount: config.tokens.enabled ? config.tokens.count : 0,
+        tokenMode: config.tokens.mode,
+        asciiLength: config.tokens.asciiLength,
+        wordCount: config.words.enabled ? config.words.count : 0,
+        wordCase: config.words.output === 'full' ? config.words.case : config.words.output ?? config.words.case,
         format: config.format,
         user: git.user,
         commit: git.commit,
-        branch: git.branch,
-        dirty: git.dirty,
+        branch: config.branch.enabled ? git.branch : undefined,
+        dirty: config.commit.includeDirty ? git.dirty : false,
+        maxLength: config.validation.maxStampLength,
       });
       stamp = result.stamp;
       const out = options.out ?? 'public/stampog.json';
