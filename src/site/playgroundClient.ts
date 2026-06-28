@@ -9,6 +9,7 @@ import {
 } from './playground.js';
 
 const storageKey = 'estamper-playground';
+// Keep the regenerated lists short enough for the default two-token stamp preview.
 const regeneratedTokenCount = 4;
 
 type FieldElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
