@@ -1,5 +1,6 @@
 ---
 import '../styles/site.css';
+import EstamperDogfood from '../components/EstamperDogfood.astro';
 const demoStamp = 'stg-az-🍉-🛠️-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
 const features = ['ENV label', 'Cloud provider', 'Emoji tokens', 'Human words', 'Timestamp', 'GitHub actor', 'Commit hash', 'Dirty state', 'ASCII fallback', 'Copy on click', 'YAML config', 'GHA ready'];
 const integrations = ['JS', 'TS', 'Python', '.NET', 'Ruby', 'Vite', 'Webpack', 'Rollup', 'esbuild', 'Vercel', 'Netlify', 'GCP', 'Azure', 'AWS', 'Fly.io'];
@@ -88,6 +89,16 @@ bunx estamper generate</pre></div>
           <h2>Build your stamp ↗</h2>
           <p>Try emoji/ascii modes, presets, YAML export, JSON export, snippets, and a browser badge preview.</p>
           <a class="button primary" href="/playground/">Open playground</a>
+          <a class="button" href="/docs/getting-started/">Get started</a>
+        </div>
+      </section>
+
+      <section class="section container">
+        <div class="card">
+          <p class="eyebrow">Dogfooding</p>
+          <h2>This site stamps itself.</h2>
+          <p>The production build generates <code>public/estamper.json</code> before Astro builds, then mounts the same copyable badge that Estamper users add to their apps.</p>
+          <pre>bunx estamper generate --config estamper.config.yml --out public/estamper.json</pre>
         </div>
       </section>
 
@@ -96,6 +107,7 @@ bunx estamper generate</pre></div>
       </section>
     </main>
     <footer class="site-footer"><div class="container"><strong>estamper.dev</strong><div class="nav-links"><a href="https://github.com/roktiw/estamper-priv">GitHub</a><a href="https://www.npmjs.com/package/estamper">npm</a><a href="https://x.com/roktiw">Twitter/X</a><a href="/docs/">Docs</a></div><span>MIT License · made by roktiw</span></div></footer>
+    <EstamperDogfood />
     <script>
       const emojiStamp = 'stg-az-🍉-🛠️-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
       const asciiStamp = 'stg-az-WM-TL-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';

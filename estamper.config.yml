@@ -1,0 +1,108 @@
+schemaVersion: 1
+name: estamper-www
+mode: auto
+preset: standard
+
+format: "{env}-{cloud}-{token1}-{token2}-{word1}-{word2}-{date}-{time}-{user}@{commit}"
+
+env:
+  enabled: true
+  value: auto
+  fallback: dev
+
+cloud:
+  enabled: true
+  provider: auto
+  fallback: ghp
+
+tokens:
+  enabled: true
+  count: 2
+  mode: auto
+  asciiLength: 2
+  emoji:
+    allow:
+      - 🏷️
+      - ✅
+      - 🛠️
+      - 🚀
+      - 🧪
+  ascii:
+    allow:
+      - ST
+      - OK
+      - TL
+      - RX
+      - QA
+  mappings:
+    - emoji: 🏷️
+      ascii2: ST
+      ascii3: TAG
+      name: tag
+    - emoji: ✅
+      ascii2: OK
+      ascii3: CHK
+      name: check
+
+words:
+  enabled: true
+  count: 2
+  case: lower
+  output: full
+  allow:
+    - stamp
+    - seal
+    - mark
+    - badge
+    - build
+    - deploy
+    - release
+    - silver
+    - river
+    - pixel
+    - orbit
+  aliases:
+    - word: stamp
+      code2: ST
+      code3: STP
+    - word: seal
+      code2: SL
+      code3: SEL
+    - word: badge
+      code2: BG
+      code3: BDG
+    - word: build
+      code2: BD
+      code3: BLD
+
+date:
+  enabled: true
+  format: yyyy-mm-dd
+  timezone: utc
+
+time:
+  enabled: true
+  format: hh:mm
+  timezone: utc
+
+user:
+  enabled: true
+  source: auto
+  fallback: github-actions
+
+commit:
+  enabled: true
+  length: 7
+  prefix: "@"
+  includeDirty: true
+  dirtyMarker: "~"
+
+badge:
+  enabled: true
+  position: bottom-right
+  theme: auto
+  copyOnClick: true
+  showDetailsOnClick: true
+
+output:
+  json: public/estamper.json

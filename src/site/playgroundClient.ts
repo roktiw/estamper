@@ -30,7 +30,7 @@ export function mountPlayground(defaults: PlaygroundConfig): void {
     return {
       env: field('env')?.value || defaults.env,
       cloud: field('cloud')?.value || defaults.cloud,
-      mode: field('mode')?.value === 'ascii' ? 'ascii' : 'emoji',
+      mode: field('mode')?.value === 'ascii' ? 'ascii' : field('mode')?.value === 'auto' ? 'auto' : 'emoji',
       emojis: list('emojis'),
       ascii: list('ascii'),
       words: list('words'),
@@ -42,6 +42,12 @@ export function mountPlayground(defaults: PlaygroundConfig): void {
       branch: Boolean((field('branch') as HTMLInputElement | null)?.checked),
       build: Boolean((field('build') as HTMLInputElement | null)?.checked),
       preset: (field('preset')?.value || 'standard') as PlaygroundPreset,
+      tokenCount: Number(field('tokenCount')?.value || defaults.tokenCount),
+      wordCount: Number(field('wordCount')?.value || defaults.wordCount),
+      asciiLength: Number(field('asciiLength')?.value || defaults.asciiLength) === 3 ? 3 : 2,
+      commitLength: Number(field('commitLength')?.value || defaults.commitLength),
+      badgePosition: (field('badgePosition')?.value || defaults.badgePosition) as PlaygroundConfig['badgePosition'],
+      theme: (field('theme')?.value || defaults.theme) as PlaygroundConfig['theme'],
     };
   }
 
