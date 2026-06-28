@@ -16,8 +16,23 @@ function cleanList(values: string[] | undefined, fallback: string[]): string[] {
   return list;
 }
 
+function resolveMode(options: GenerateStampOptions): StampParts['mode'] {
+  if (options.mode === 'ascii') return 'ascii';
+  if (options.mode === 'auto' && options.emojiSupported === false) return 'ascii';
+  return 'emoji';
+}
+
+function resolveFormat(mode: StampParts['mode'], format?: string): string {
+  if (!format) return mode === 'ascii' ? asciiFormat : defaultFormat;
+  const hasAsciiPlaceholder = format.includes('{ascii1}') || format.includes('{ascii2}');
+  if (mode === 'ascii' && !hasAsciiPlaceholder && format.includes('{emoji')) {
+    return format.replaceAll('{emoji1}', '{ascii1}').replaceAll('{emoji2}', '{ascii2}');
+  }
+  return format;
+}
+
 export function generateStamp(options: GenerateStampOptions = {}): StampResult {
-  const mode: StampParts['mode'] = options.mode === 'ascii' ? 'ascii' : 'emoji';
+  const mode = resolveMode(options);
   const picker = createPicker(options.seed);
   const words = cleanList(options.words, defaultWords);
   const emojis = cleanList(options.emojis, defaultEmojis);
@@ -33,7 +48,7 @@ export function generateStamp(options: GenerateStampOptions = {}): StampResult {
     ascii2,
     word1,
     word2,
-    date: formatDate(options.date ?? new Date()),
+    date: formatDate(options.date ?? new Date(), options.dateTimezone),
     user: options.user?.trim() || 'unknown',
     commit: (options.commit?.trim() || 'unknown').slice(0, 64),
     branch: options.branch,
@@ -41,8 +56,7 @@ export function generateStamp(options: GenerateStampOptions = {}): StampResult {
     mode,
   };
 
-  const fallbackFormat = mode === 'ascii' ? asciiFormat : defaultFormat;
-  const stamp = formatStamp(options.format ?? fallbackFormat, parts);
+  const stamp = formatStamp(resolveFormat(mode, options.format), parts);
   const maxLength = options.maxLength ?? MAX_STAMP_LENGTH;
   if (stamp.length > maxLength) {
     throw new Error(`Stampog stamp is too long (${stamp.length}/${maxLength}).`);
