@@ -3,6 +3,7 @@ import { writeFile } from 'node:fs/promises';
 import YAML from 'yaml';
 import { defaultConfig } from '../config/defaultConfig.js';
 import { loadConfig } from '../config/loadConfig.js';
+import { resolveStampOptions } from '../config/resolveStampOptions.js';
 import { generateStamp } from '../core/generateStamp.js';
 import { getGitInfo } from '../git/getGitInfo.js';
 import { writeHtml, writeJs, writeJson } from './output.js';
@@ -32,18 +33,7 @@ Usage:
 async function buildStamp(args: string[]) {
   const config = await loadConfig(argValue(args, '--config'));
   const git = getGitInfo(config.git.commitLength);
-  return generateStamp({
-    mode: config.mode,
-    words: config.words.allow,
-    emojis: config.emojis.allow,
-    ascii: config.ascii.allow,
-    format: config.mode === 'ascii' ? config.format.replaceAll('emoji', 'ascii') : config.format,
-    user: git.user,
-    commit: git.commit,
-    branch: config.git.includeBranch ? git.branch : undefined,
-    dirty: config.git.includeDirty ? git.dirty : undefined,
-    seed: argValue(args, '--seed'),
-  });
+  return generateStamp(resolveStampOptions(config, git, argValue(args, '--seed')));
 }
 
 async function main(args: string[]): Promise<void> {

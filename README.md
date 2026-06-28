@@ -5,13 +5,13 @@ Stampog is a tiny ESM-first package for human-friendly build/version stamps in w
 Example stamp:
 
 ```text
-🍉-🛠️-silver-river-2026-06-28-04:12:09-roktiw@a1b2c3d
+stg-az-🍉-🛠️-silver-river-2026-06-28-04:12-roktiw@a1b2c3d
 ```
 
 ASCII fallback:
 
 ```text
-WM-TL-silver-river-2026-06-28-04:12:09-roktiw@a1b2c3d
+STG-AZ-WM-TL-silver-river-2026-06-28-04:12-roktiw@a1b2c3d
 ```
 
 It answers: “Which exact build am I looking at?” without DevTools or guessing commit IDs.
@@ -38,6 +38,8 @@ import { generateStamp } from 'stampog';
 
 const result = generateStamp({
   mode: 'emoji',
+  env: 'stg',
+  cloud: 'az',
   words: ['silver', 'river', 'melon', 'orbit'],
   emojis: ['🍉', '🛠️', '🚀', '🐶'],
   ascii: ['WM', 'TL', 'RX', 'DG'],
@@ -48,7 +50,13 @@ const result = generateStamp({
 });
 ```
 
-`seed` makes token selection deterministic; omit it for random stamps.
+Default stamps follow:
+
+```text
+[env]-[cloud]-[token1]-[token2]-[word1]-[word2]-[yyyy-mm-dd]-[hh:mm]-[user]@[commit]
+```
+
+`seed` makes token selection deterministic; without it, token selection is derived from the commit.
 
 ## CLI
 
@@ -72,9 +80,16 @@ The default config lives in `stampog.config.yml`. YAML and JSON config files are
 Important fields:
 
 - `mode`: `emoji`, `ascii`, or `auto`
-- `format`: token template, e.g. `{emoji1}-{emoji2}-{word1}-{word2}-{date}-{user}@{commit}`
+- `env`: explicit token or auto-detection from `VITE_ENV`, `NODE_ENV`, or `DEPLOY_ENV`
+- `cloud`: explicit provider or auto-detection from deployment environment variables such as `VERCEL`, `NETLIFY`, `AWS_REGION`, or `AZURE_CLIENT_ID`
+- `format`: token template, e.g. `{env}-{cloud}-{token1}-{token2}-{word1}-{word2}-{date}-{time}-{user}@{commit}`
+- `tokens.count`, `words.count`: 1–4 generated token/word segments
+- `date.format`: `yyyy-mm-dd`, `yy-mm-dd`, `mmdd`, `yyyymmdd`, or `iso-date`
+- `time.format`: `hh:mm`, `hh:mm:ss`, `hhmm`, `hhmmss`, or `unix`
 - `words.allow`, `emojis.allow`, `ascii.allow`: dictionaries used by the generator
 - `git.commitLength`: short commit length
+- `git.includeBranch`: opt-in branch suffix support; disabled by default
+- `git.includeDirty`: adds `~` to dirty local commits
 - `badge.position`: `top-left`, `top-right`, `bottom-left`, `bottom-right`
 - `output`: default output paths
 
@@ -86,7 +101,7 @@ Config is validated with clear errors and capped token lists to avoid oversized 
 import { mountStampog } from 'stampog/browser';
 
 mountStampog({
-  stamp: '🍉-🛠️-silver-river-2026-06-28-04:12:09-roktiw@a1b2c3d',
+  stamp: 'stg-az-🍉-🛠️-silver-river-2026-06-28-04:12-roktiw@a1b2c3d',
   position: 'bottom-right',
   theme: 'dark',
 });

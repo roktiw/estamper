@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { loadConfig } from '../config/loadConfig.js';
+import { resolveStampOptions } from '../config/resolveStampOptions.js';
 import { generateStamp } from '../core/generateStamp.js';
 import { getGitInfo } from '../git/getGitInfo.js';
 
@@ -19,17 +20,7 @@ export function stampogVitePlugin(options: StampogVitePluginOptions = {}) {
     async buildStart() {
       const config = await loadConfig(options.config);
       const git = getGitInfo(config.git.commitLength);
-      const result = generateStamp({
-        mode: config.mode,
-        words: config.words.allow,
-        emojis: config.emojis.allow,
-        ascii: config.ascii.allow,
-        format: config.format,
-        user: git.user,
-        commit: git.commit,
-        branch: git.branch,
-        dirty: git.dirty,
-      });
+      const result = generateStamp(resolveStampOptions(config, git));
       stamp = result.stamp;
       const out = options.out ?? 'public/stampog.json';
       await mkdir(dirname(out), { recursive: true });
