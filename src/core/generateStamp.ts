@@ -25,7 +25,8 @@ function resolveMode(options: GenerateStampOptions): StampParts['mode'] {
 function resolveFormat(mode: StampParts['mode'], format?: string): string {
   if (!format) return mode === 'ascii' ? asciiFormat : defaultFormat;
   const hasAsciiPlaceholder = format.includes('{ascii1}') || format.includes('{ascii2}');
-  if (mode === 'ascii' && !hasAsciiPlaceholder && format.includes('{emoji')) {
+  const hasEmojiPlaceholder = format.includes('{emoji1}') || format.includes('{emoji2}');
+  if (mode === 'ascii' && !hasAsciiPlaceholder && hasEmojiPlaceholder) {
     return format.replaceAll('{emoji1}', '{ascii1}').replaceAll('{emoji2}', '{ascii2}');
   }
   return format;

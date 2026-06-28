@@ -13,7 +13,12 @@ const storageKey = 'estamper-playground';
 type FieldElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 function shuffle<T>(values: T[]): T[] {
-  return [...values].sort(() => Math.random() - 0.5);
+  const output = [...values];
+  for (let index = output.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [output[index], output[swapIndex]] = [output[swapIndex], output[index]];
+  }
+  return output;
 }
 
 export function mountPlayground(defaults: PlaygroundConfig): void {
@@ -24,7 +29,9 @@ export function mountPlayground(defaults: PlaygroundConfig): void {
   const output = (name: string): HTMLElement | null => root.querySelector(`[data-output="${name}"]`);
   const action = (name: string): HTMLButtonElement | null => root.querySelector(`[data-action="${name}"]`);
   const list = (name: keyof PlaygroundConfig): string[] => String(field(name)?.value || '').split('\n').map((value) => value.trim()).filter(Boolean);
-  const copy = (text: string | null | undefined) => navigator.clipboard?.writeText(text ?? '').catch(() => undefined);
+  const copy = (text: string | null | undefined) => navigator.clipboard?.writeText(text ?? '').catch((error: unknown) => {
+    console.warn('Could not copy Estamper playground output.', error);
+  });
 
   function readConfig(): PlaygroundConfig {
     return {

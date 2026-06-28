@@ -50,7 +50,7 @@ export function mountEstamper(options: MountEstamperOptions): HTMLElement {
   }
   const { element: target, selector: targetSelector } = resolveTarget(options.target);
   if (!target) {
-    throw new Error(`Estamper target was not found: ${targetSelector}`);
+    throw new Error(targetSelector ? `Estamper target was not found: ${targetSelector}` : 'Estamper target was not found.');
   }
   const doc = target.ownerDocument;
   ensureStyle(doc);

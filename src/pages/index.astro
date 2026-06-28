@@ -110,11 +110,12 @@ bunx estamper generate</pre></div>
         if (stamp) stamp.textContent = emoji ? emojiStamp : asciiStamp;
         toggle.textContent = emoji ? 'Switch to ASCII' : 'Switch to emoji';
       });
-      setInterval(() => {
+      const stampIntervalId = setInterval(() => {
         if (!stamp) return;
         const minute = String((new Date().getMinutes() + 42) % 60).padStart(2, '0');
         stamp.textContent = (emoji ? emojiStamp : asciiStamp).replace('14:02', `14:${minute}`);
       }, 4000);
+      window.addEventListener('pagehide', () => clearInterval(stampIntervalId), { once: true });
     </script>
   </body>
 </html>
