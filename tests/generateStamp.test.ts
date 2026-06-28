@@ -31,6 +31,31 @@ describe('generateStamp', () => {
     expect(result.stamp).not.toContain('🍉');
   });
 
+  it('uses ascii tokens for auto mode when emoji support is disabled', () => {
+    const result = generateStamp({
+      mode: 'auto',
+      emojiSupported: false,
+      format: '{emoji1}-{emoji2}-{word1}-{word2}-{date}-{user}@{commit}',
+      ascii: ['WM', 'TL'],
+      words: ['silver', 'river'],
+      date,
+      user: 'roktiw',
+      commit: 'a1b2c3d',
+      seed: 'auto-ascii',
+    });
+    expect(result.parts.mode).toBe('ascii');
+    expect(result.stamp).toMatch(/^(WM|TL)-(WM|TL)-/);
+  });
+
+  it('supports UTC date formatting', () => {
+    const result = generateStamp({
+      date: new Date('2026-06-28T04:12:09Z'),
+      dateTimezone: 'utc',
+      format: '{date}',
+    });
+    expect(result.stamp).toBe('2026-06-28-04:12:09');
+  });
+
   it('supports custom formats', () => {
     const result = generateStamp({
       format: '{word1}/{commit}/{user}',

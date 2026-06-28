@@ -1,5 +1,4 @@
 schemaVersion: 1
-
 name: estamper-www
 mode: auto
 preset: standard
@@ -47,6 +46,8 @@ tokens:
       - PIN
       - BLD
       - DEP
+      - TL
+      - RX
       - QA
   mappings:
     - emoji: 🏷️
@@ -146,4 +147,4 @@ badge:
   showDetailsOnClick: true
 
 output:
-  json: "public/estamper.json"
+  json: public/estamper.json

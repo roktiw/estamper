@@ -1,7 +1,7 @@
 import YAML from 'yaml';
 import { defaultAscii, defaultEmojis, defaultWords } from '../core/defaults.js';
 
-export type PlaygroundMode = 'emoji' | 'ascii';
+export type PlaygroundMode = 'emoji' | 'ascii' | 'auto';
 export type PlaygroundPreset = 'standard' | 'minimal' | 'verbose' | 'games' | 'ascii' | 'ci' | 'custom';
 
 export interface PlaygroundConfig {
@@ -19,6 +19,12 @@ export interface PlaygroundConfig {
   branch: boolean;
   build: boolean;
   preset: PlaygroundPreset;
+  tokenCount: number;
+  wordCount: number;
+  asciiLength: 2 | 3;
+  commitLength: number;
+  badgePosition: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+  theme: 'auto' | 'light' | 'dark';
 }
 
 export const defaultPlaygroundConfig: PlaygroundConfig = {
@@ -36,6 +42,12 @@ export const defaultPlaygroundConfig: PlaygroundConfig = {
   branch: false,
   build: false,
   preset: 'standard',
+  tokenCount: 2,
+  wordCount: 2,
+  asciiLength: 2,
+  commitLength: 7,
+  badgePosition: 'bottom-right',
+  theme: 'auto',
 };
 
 const presets: Record<PlaygroundPreset, Partial<PlaygroundConfig>> = {
@@ -53,6 +65,11 @@ function cleanList(values: string[], fallback: string[]): string[] {
   return cleaned.length > 0 ? cleaned : fallback;
 }
 
+function clampInteger(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  return Math.min(max, Math.max(min, Math.trunc(value)));
+}
+
 export function applyPlaygroundPreset(preset: PlaygroundPreset, config: PlaygroundConfig = defaultPlaygroundConfig): PlaygroundConfig {
   return { ...config, ...presets[preset], preset };
 }
@@ -62,17 +79,17 @@ export function buildPlaygroundStamp(config: PlaygroundConfig): string {
   const visualTokens = config.mode === 'ascii'
     ? cleanList(config.ascii, defaultPlaygroundConfig.ascii)
     : cleanList(config.emojis, defaultPlaygroundConfig.emojis);
+  const tokenCount = clampInteger(config.tokenCount, 0, 4);
+  const wordCount = clampInteger(config.wordCount, 0, 4);
   const segments = [
     config.env.trim() || defaultPlaygroundConfig.env,
     config.cloud.trim() || defaultPlaygroundConfig.cloud,
-    visualTokens[0] ?? defaultPlaygroundConfig.emojis[0],
-    visualTokens[1] ?? visualTokens[0] ?? defaultPlaygroundConfig.emojis[1],
-    words[0] ?? defaultPlaygroundConfig.words[0],
-    words[1] ?? words[0] ?? defaultPlaygroundConfig.words[1],
+    ...Array.from({ length: tokenCount }, (_, index) => visualTokens[index % visualTokens.length]),
+    ...Array.from({ length: wordCount }, (_, index) => words[index % words.length]),
     `${config.date || defaultPlaygroundConfig.date}-${config.time || defaultPlaygroundConfig.time}`,
   ];
   const suffixes = [
-    `${config.user.trim() || defaultPlaygroundConfig.user}@${(config.commit.trim() || defaultPlaygroundConfig.commit).slice(0, 12)}`,
+    `${config.user.trim() || defaultPlaygroundConfig.user}@${(config.commit.trim() || defaultPlaygroundConfig.commit).slice(0, clampInteger(config.commitLength, 4, 12))}`,
   ];
   if (config.branch) suffixes.push('main');
   if (config.build) suffixes.push('build-42');
@@ -82,21 +99,33 @@ export function buildPlaygroundStamp(config: PlaygroundConfig): string {
 
 export function buildPlaygroundYaml(config: PlaygroundConfig): string {
   return YAML.stringify({
+    schemaVersion: 1,
     name: 'estamper',
+    preset: config.preset,
+    format: '{env}-{cloud}-{token1}-{token2}-{word1}-{word2}-{date}-{time}-{user}@{commit}',
     env: config.env,
     cloud: config.cloud,
     mode: config.mode,
-    words: { allow: cleanList(config.words, defaultPlaygroundConfig.words) },
-    emojis: { allow: cleanList(config.emojis, defaultPlaygroundConfig.emojis) },
-    ascii: { allow: cleanList(config.ascii, defaultPlaygroundConfig.ascii) },
+    tokens: {
+      enabled: config.tokenCount > 0,
+      count: clampInteger(config.tokenCount, 0, 4),
+      mode: config.mode,
+      asciiLength: config.asciiLength,
+      emoji: { allow: cleanList(config.emojis, defaultPlaygroundConfig.emojis) },
+      ascii: { allow: cleanList(config.ascii, defaultPlaygroundConfig.ascii) },
+    },
+    words: { enabled: config.wordCount > 0, count: clampInteger(config.wordCount, 0, 4), allow: cleanList(config.words, defaultPlaygroundConfig.words) },
+    date: { enabled: true, format: 'yyyy-mm-dd', timezone: 'utc' },
+    time: { enabled: true, format: 'hh:mm', timezone: 'utc' },
     git: {
       user: config.user,
       commit: config.commit,
+      commitLength: clampInteger(config.commitLength, 4, 12),
       includeBranch: config.branch,
       includeDirty: config.dirty,
     },
     build: { includeNumber: config.build },
-    badge: { enabled: true, position: 'bottom-right', copyOnClick: true },
+    badge: { enabled: true, position: config.badgePosition, theme: config.theme, copyOnClick: true },
   });
 }
 
@@ -105,5 +134,5 @@ export function buildPlaygroundJson(config: PlaygroundConfig): string {
 }
 
 export function buildPlaygroundSnippet(config: PlaygroundConfig): string {
-  return `import { mountEstamper } from 'estamper/browser';\n\nmountEstamper({\n  stamp: ${JSON.stringify(buildPlaygroundStamp(config))},\n  position: 'bottom-right',\n});\n`;
+  return `import { mountEstamper } from 'estamper/browser';\n\nmountEstamper({\n  stamp: ${JSON.stringify(buildPlaygroundStamp(config))},\n  position: ${JSON.stringify(config.badgePosition)},\n  theme: ${JSON.stringify(config.theme)},\n});\n`;
 }

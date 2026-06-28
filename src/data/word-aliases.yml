@@ -1,0 +1,13 @@
+aliases:
+  - word: melon
+    code2: ML
+    code3: MLN
+  - word: silver
+    code2: SV
+    code3: SLV
+  - word: river
+    code2: RV
+    code3: RVR
+  - word: debug
+    code2: DG
+    code3: DBG

@@ -1,0 +1,5 @@
+features:
+  - Visible in screenshots
+  - Emoji and ASCII modes
+  - CI and deploy metadata
+  - Copyable browser badge

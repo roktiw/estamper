@@ -1,0 +1,17 @@
+mappings:
+  - emoji: 🏷️
+    ascii2: ST
+    ascii3: TAG
+    name: tag
+  - emoji: ✅
+    ascii2: OK
+    ascii3: CHK
+    name: check
+  - emoji: 🛠️
+    ascii2: TL
+    ascii3: TLS
+    name: tools
+  - emoji: 🚀
+    ascii2: RX
+    ascii3: RKT
+    name: rocket

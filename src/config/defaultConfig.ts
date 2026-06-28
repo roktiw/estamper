@@ -1,10 +1,10 @@
 import { defaultAscii, defaultEmojis, defaultFormat, defaultWords } from '../core/defaults.js';
-import type { StampogMode } from '../core/types.js';
+import type { EstamperMode } from '../core/types.js';
 
-export interface StampogConfig {
+export interface EstamperConfig {
   schemaVersion?: number;
   name: string;
-  mode: StampogMode;
+  mode: EstamperMode;
   preset?: string;
   format: string;
   env?: {
@@ -59,7 +59,7 @@ export interface StampogConfig {
   };
   badge: {
     enabled: boolean;
-    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'custom';
     startVisible: boolean;
     copyOnClick: boolean;
     showDetailsOnClick: boolean;
@@ -72,8 +72,8 @@ export interface StampogConfig {
   };
 }
 
-export const defaultConfig: StampogConfig = {
-  name: 'stampog',
+export const defaultConfig: EstamperConfig = {
+  name: 'estamper',
   mode: 'emoji',
   format: defaultFormat,
   env: {
@@ -143,8 +143,8 @@ export const defaultConfig: StampogConfig = {
     theme: 'dark',
   },
   output: {
-    json: 'dist/stampog.json',
-    js: 'dist/stampog.js',
-    htmlSnippet: 'dist/stampog-snippet.html',
+    json: 'dist/estamper.json',
+    js: 'dist/estamper.js',
+    htmlSnippet: 'dist/estamper-snippet.html',
   },
 };

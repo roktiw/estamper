@@ -17,7 +17,7 @@ function has(args: string[], name: string): boolean {
 }
 
 function help(): void {
-  console.log(`Stampog
+  console.log(`Estamper
 
 Usage:
   estamper init
@@ -38,14 +38,14 @@ async function buildStamp(args: string[]) {
   const config = await loadConfig(argValue(args, '--config'));
   const git = getGitInfo(config.git.commitLength);
   const envValue = config.env?.value === 'auto' ? (process.env.ESTAMPER_ENV ?? process.env.NODE_ENV) : config.env?.value;
-  const cloudValue = config.cloud?.provider === 'auto' ? (process.env.ESTAMPER_CLOUD ?? (process.env.VERCEL ? 'vercel' : undefined)) : config.cloud?.provider;
+  const cloudValue = config.cloud?.provider === 'auto' ? (process.env.ESTAMPER_CLOUD ?? (process.env.GITHUB_ACTIONS ? 'github-pages' : process.env.VERCEL ? 'vercel' : undefined)) : config.cloud?.provider;
   return generateStamp({
     mode: config.mode,
     words: config.words.allow,
     emojis: config.emojis.allow,
     ascii: config.ascii.allow,
     tokens: config.tokens?.enabled ? config.tokens.emoji?.allow : undefined,
-    format: config.mode === 'ascii' ? config.format.replaceAll('emoji', 'ascii') : config.format,
+    format: config.format,
     env: config.env?.enabled ? mapped(envValue, config.env.map, config.env.fallback) : undefined,
     cloud: config.cloud?.enabled ? mapped(cloudValue, config.cloud.map, config.cloud.fallback) : undefined,
     user: git.user,
@@ -75,7 +75,7 @@ async function main(args: string[]): Promise<void> {
 
   if (command === 'validate-config') {
     await loadConfig(argValue(args, '--config'));
-    console.log('Stampog config is valid.');
+    console.log('Estamper config is valid.');
     return;
   }
 
@@ -89,11 +89,11 @@ async function main(args: string[]): Promise<void> {
     return;
   }
   if (command === 'html') {
-    await writeHtml(argValue(args, '--out') ?? 'dist/stampog-snippet.html', stamp);
+    await writeHtml(argValue(args, '--out') ?? 'dist/estamper-snippet.html', stamp);
     return;
   }
   if (command === 'generate') {
-    await writeJson(argValue(args, '--out') ?? 'dist/stampog.json', stamp);
+    await writeJson(argValue(args, '--out') ?? 'dist/estamper.json', stamp);
     if (argValue(args, '--js')) await writeJs(argValue(args, '--js')!, stamp);
     if (argValue(args, '--html')) await writeHtml(argValue(args, '--html')!, stamp);
     console.log(stamp.stamp);
