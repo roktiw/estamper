@@ -9,6 +9,7 @@ import {
 } from './playground.js';
 
 const storageKey = 'estamper-playground';
+const regeneratedTokenCount = 4;
 
 type FieldElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
@@ -90,8 +91,8 @@ export function mountPlayground(defaults: PlaygroundConfig): void {
     render();
   });
   action('regenerate')?.addEventListener('click', () => {
-    setList('words', shuffle(defaults.words).slice(0, 4));
-    setList('emojis', shuffle(defaults.emojis).slice(0, 4));
+    setList('words', shuffle(defaults.words).slice(0, regeneratedTokenCount));
+    setList('emojis', shuffle(defaults.emojis).slice(0, regeneratedTokenCount));
     render();
   });
   action('copy-stamp')?.addEventListener('click', () => copy(output('stamp')?.textContent));
