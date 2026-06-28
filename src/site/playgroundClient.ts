@@ -36,10 +36,11 @@ export function mountPlayground(defaults: PlaygroundConfig): void {
   });
 
   function readConfig(): PlaygroundConfig {
+    const modeValue = field('mode')?.value;
     return {
       env: field('env')?.value || defaults.env,
       cloud: field('cloud')?.value || defaults.cloud,
-      mode: field('mode')?.value === 'ascii' ? 'ascii' : field('mode')?.value === 'auto' ? 'auto' : 'emoji',
+      mode: modeValue === 'ascii' || modeValue === 'auto' ? modeValue : 'emoji',
       emojis: list('emojis'),
       ascii: list('ascii'),
       words: list('words'),
