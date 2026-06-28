@@ -11,7 +11,7 @@ function cleanList(values: string[] | undefined, fallback: string[]): string[] {
     .filter(Boolean)
     .slice(0, 256);
   if (list.some((value) => value.length > 64)) {
-    throw new Error('Stampog token values must be 64 characters or shorter.');
+    throw new Error('Estamper token values must be 64 characters or shorter.');
   }
   return list;
 }
@@ -45,7 +45,7 @@ export function generateStamp(options: GenerateStampOptions = {}): StampResult {
   const stamp = formatStamp(options.format ?? fallbackFormat, parts);
   const maxLength = options.maxLength ?? MAX_STAMP_LENGTH;
   if (stamp.length > maxLength) {
-    throw new Error(`Stampog stamp is too long (${stamp.length}/${maxLength}).`);
+    throw new Error(`Estamper stamp is too long (${stamp.length}/${maxLength}).`);
   }
 
   return { stamp, parts };

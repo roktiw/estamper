@@ -1,11 +1,11 @@
 {
-  "name": "stampog",
+  "name": "estamper",
   "version": "0.1.0",
-  "description": "Human-friendly build/version stamps for web apps and games.",
+  "description": "Human-readable build stamps for web apps, staging, QA and screenshots.",
   "type": "module",
   "license": "MIT",
   "bin": {
-    "stampog": "./dist/cli/index.js"
+    "estamper": "./dist/cli/index.js"
   },
   "exports": {
     ".": "./dist/index.js",
@@ -15,7 +15,7 @@
   },
   "files": [
     "dist",
-    "stampog.config.yml",
+    "estamper.config.yml",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"
@@ -38,5 +38,21 @@
   },
   "engines": {
     "node": ">=18"
-  }
+  },
+  "keywords": [
+    "build",
+    "version",
+    "stamp",
+    "badge",
+    "git",
+    "github",
+    "commit",
+    "deployment",
+    "vite",
+    "qa",
+    "debug",
+    "frontend",
+    "web-games",
+    "release"
+  ]
 }

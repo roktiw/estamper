@@ -1,4 +1,4 @@
-name: stampog
+name: estamper
 mode: emoji
 format: "{emoji1}-{emoji2}-{word1}-{word2}-{date}-{user}@{commit}"
 
@@ -61,6 +61,6 @@ badge:
   theme: dark
 
 output:
-  json: "dist/stampog.json"
-  js: "dist/stampog.js"
-  htmlSnippet: "dist/stampog-snippet.html"
+  json: "dist/estamper.json"
+  js: "dist/estamper.js"
+  htmlSnippet: "dist/estamper-snippet.html"

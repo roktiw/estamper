@@ -21,7 +21,7 @@ export function createPicker(seed?: string | number): (length: number) => number
 
 export function pickTwo<T>(items: T[], pick: (length: number) => number): [T, T] {
   if (items.length === 0) {
-    throw new Error('Stampog needs at least one token to pick from.');
+    throw new Error('Estamper needs at least one token to pick from.');
   }
   return [items[pick(items.length)], items[pick(items.length)]];
 }

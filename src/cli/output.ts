@@ -9,15 +9,15 @@ export async function writeJson(path: string, stamp: StampResult): Promise<void>
 
 export async function writeJs(path: string, stamp: StampResult): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, `export const stampog = ${JSON.stringify(stamp, null, 2)};\nexport default stampog;\n`, 'utf8');
+  await writeFile(path, `export const estamper = ${JSON.stringify(stamp, null, 2)};\nexport default estamper;\n`, 'utf8');
 }
 
 export async function writeHtml(path: string, stamp: StampResult): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   const html = `<script type="module">
-  import { mountStampog } from './stampog-browser.js';
+  import { mountEstamper } from './estamper-browser.js';
 
-  mountStampog({
+  mountEstamper({
     stamp: ${JSON.stringify(stamp.stamp)}
   });
 </script>

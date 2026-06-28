@@ -4,7 +4,7 @@ import { loadConfig } from '../config/loadConfig.js';
 import { generateStamp } from '../core/generateStamp.js';
 import { getGitInfo } from '../git/getGitInfo.js';
 
-export interface StampogVitePluginOptions {
+export interface EstamperVitePluginOptions {
   config?: string;
   out?: string;
   inject?: boolean;
@@ -12,10 +12,10 @@ export interface StampogVitePluginOptions {
   meta?: boolean;
 }
 
-export function stampogVitePlugin(options: StampogVitePluginOptions = {}) {
+export function estamperVitePlugin(options: EstamperVitePluginOptions = {}) {
   let stamp = '';
   return {
-    name: 'stampog',
+    name: 'estamper',
     async buildStart() {
       const config = await loadConfig(options.config);
       const git = getGitInfo(config.git.commitLength);
@@ -31,17 +31,17 @@ export function stampogVitePlugin(options: StampogVitePluginOptions = {}) {
         dirty: git.dirty,
       });
       stamp = result.stamp;
-      const out = options.out ?? 'public/stampog.json';
+      const out = options.out ?? 'public/estamper.json';
       await mkdir(dirname(out), { recursive: true });
       await writeFile(out, `${JSON.stringify(result, null, 2)}\n`, 'utf8');
     },
     transformIndexHtml(html: string) {
       let next = html;
       if (options.meta) {
-        next = next.replace('</head>', `<meta name="stampog" content="${stamp.replaceAll('"', '&quot;')}">\n</head>`);
+        next = next.replace('</head>', `<meta name="estamper" content="${stamp.replaceAll('"', '&quot;')}">\n</head>`);
       }
       if (options.inject) {
-        const globalName = options.globalName ?? '__STAMPOG__';
+        const globalName = options.globalName ?? '__ESTAMPER__';
         next = next.replace('</head>', `<script>window.${globalName}=${JSON.stringify({ stamp })}</script>\n</head>`);
       }
       return next;
