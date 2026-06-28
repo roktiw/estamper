@@ -1,0 +1,56 @@
+:root {
+  color-scheme: dark;
+  --estamper-bg: #0f172a;
+  --estamper-card: #111827;
+  --estamper-muted: #94a3b8;
+  --estamper-text: #f8fafc;
+  --estamper-accent: #ff7a1a;
+  --estamper-accent-2: #38bdf8;
+  --estamper-border: rgba(255, 255, 255, 0.12);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top left, rgba(255, 122, 26, 0.18), transparent 34rem), var(--estamper-bg);
+  color: var(--estamper-text);
+}
+a { color: inherit; }
+.container { width: min(1120px, calc(100% - 2rem)); margin: 0 auto; }
+.site-nav, .site-footer { border-bottom: 1px solid var(--estamper-border); background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(18px); }
+.site-nav .container, .site-footer .container { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 0; flex-wrap: wrap; }
+.logo { font-weight: 800; letter-spacing: -0.04em; text-decoration: none; }
+.nav-links { display: flex; gap: 1rem; color: var(--estamper-muted); font-size: 0.95rem; }
+.nav-links a { text-decoration: none; }
+.nav-links a:hover { color: var(--estamper-text); }
+.hero { padding: 5rem 0 3rem; text-align: center; }
+.eyebrow { color: var(--estamper-accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.78rem; }
+h1 { font-size: clamp(3rem, 10vw, 7rem); line-height: 0.9; margin: 1rem 0; letter-spacing: -0.08em; }
+h2 { font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: -0.05em; margin: 0 0 1rem; }
+p { color: var(--estamper-muted); line-height: 1.7; }
+.lede { font-size: clamp(1.2rem, 3vw, 1.7rem); max-width: 720px; margin: 0 auto 2rem; }
+.stamp-card, .card, .code-card, .playground-panel { background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); border: 1px solid var(--estamper-border); border-radius: 24px; box-shadow: 0 24px 80px rgba(0,0,0,0.28); }
+.stamp-card { max-width: 920px; margin: 2rem auto; padding: 1rem; display: flex; gap: 1rem; align-items: center; justify-content: space-between; }
+.stamp-output, code, pre, textarea, input, select { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+.stamp-output { overflow-wrap: anywhere; text-align: left; font-size: clamp(0.9rem, 2vw, 1.2rem); color: #e2e8f0; }
+.button-row { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+.button { border: 1px solid var(--estamper-border); border-radius: 999px; padding: 0.8rem 1.1rem; color: var(--estamper-text); text-decoration: none; background: rgba(255,255,255,0.06); cursor: pointer; font-weight: 700; }
+.button.primary { background: var(--estamper-accent); border-color: var(--estamper-accent); color: #1f1308; }
+.section { padding: 4rem 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+.card, .code-card { padding: 1.25rem; }
+.before-after { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; text-align: left; }
+pre { white-space: pre-wrap; color: #e2e8f0; margin: 0; }
+.feature-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0.8rem; }
+.feature-list li { padding: 0.85rem 1rem; border: 1px solid var(--estamper-border); border-radius: 16px; background: rgba(255,255,255,0.04); }
+.playground { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 1rem; align-items: start; }
+.playground-panel { padding: 1.25rem; }
+.field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem; }
+label { display: grid; gap: 0.4rem; color: #cbd5e1; font-weight: 700; font-size: 0.9rem; }
+input, select, textarea { width: 100%; border: 1px solid var(--estamper-border); border-radius: 12px; padding: 0.75rem; color: var(--estamper-text); background: rgba(15, 23, 42, 0.9); }
+textarea { min-height: 7rem; resize: vertical; }
+.badge-mockup { min-height: 220px; border-radius: 18px; border: 1px solid var(--estamper-border); background: linear-gradient(135deg, #1e293b, #020617); padding: 1rem; position: relative; }
+.badge { position: absolute; right: 1rem; bottom: 1rem; max-width: calc(100% - 2rem); padding: 0.65rem 0.85rem; border-radius: 999px; background: rgba(2, 6, 23, 0.86); border: 1px solid var(--estamper-border); font-size: 0.78rem; overflow-wrap: anywhere; }
+.site-footer { border-top: 1px solid var(--estamper-border); border-bottom: 0; margin-top: 4rem; color: var(--estamper-muted); }
+@media (max-width: 780px) { .stamp-card, .playground { grid-template-columns: 1fr; } .stamp-card { flex-direction: column; align-items: stretch; } .field-grid { grid-template-columns: 1fr; } }
