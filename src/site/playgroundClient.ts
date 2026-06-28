@@ -9,7 +9,7 @@ import {
 } from './playground.js';
 
 const storageKey = 'estamper-playground';
-// Keep the regenerated lists short enough for the default two-token stamp preview.
+// Regenerate four choices so the two-token/two-word default can show variety without making exported YAML noisy.
 const regeneratedTokenCount = 4;
 
 type FieldElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
