@@ -39,5 +39,7 @@ describe('website playground helpers', () => {
     });
 
     expect(stamp).toBe('stg-az-🍉-silver-2026-06-28-14:02-roktiw@a1b2');
+    expect(stamp.match(/🍉/g)).toHaveLength(1);
+    expect(stamp.match(/silver/g)).toHaveLength(1);
   });
 });

@@ -9,11 +9,19 @@ env:
   enabled: true
   value: auto
   fallback: dev
+  map:
+    production: prd
+    preview: pre
+    development: dev
 
 cloud:
   enabled: true
   provider: auto
-  fallback: ghp
+  fallback: loc
+  map:
+    github-pages: ghp
+    vercel: vcl
+    netlify: ntl
 
 tokens:
   enabled: true
@@ -24,6 +32,9 @@ tokens:
     allow:
       - 🏷️
       - ✅
+      - 🔖
+      - 📌
+      - 🧾
       - 🛠️
       - 🚀
       - 🧪
@@ -31,6 +42,10 @@ tokens:
     allow:
       - ST
       - OK
+      - TAG
+      - PIN
+      - BLD
+      - DEP
       - TL
       - RX
       - QA
@@ -43,6 +58,14 @@ tokens:
       ascii2: OK
       ascii3: CHK
       name: check
+    - emoji: 🛠️
+      ascii2: TL
+      ascii3: TLS
+      name: tools
+    - emoji: 🚀
+      ascii2: RX
+      ascii3: RKT
+      name: rocket
 
 words:
   enabled: true
@@ -61,6 +84,10 @@ words:
     - river
     - pixel
     - orbit
+    - rocket
+    - debug
+    - proof
+    - label
   aliases:
     - word: stamp
       code2: ST
@@ -68,12 +95,21 @@ words:
     - word: seal
       code2: SL
       code3: SEL
+    - word: mark
+      code2: MK
+      code3: MRK
     - word: badge
       code2: BG
       code3: BDG
     - word: build
       code2: BD
       code3: BLD
+    - word: deploy
+      code2: DP
+      code3: DPL
+    - word: release
+      code2: RL
+      code3: REL
 
 date:
   enabled: true
@@ -96,6 +132,12 @@ commit:
   prefix: "@"
   includeDirty: true
   dirtyMarker: "~"
+
+branch:
+  enabled: false
+
+buildNumber:
+  enabled: false
 
 badge:
   enabled: true

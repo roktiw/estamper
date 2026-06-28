@@ -30,6 +30,9 @@ export function validateConfig(config: EstamperConfig): EstamperConfig {
   assertList('words.allow', config.words.allow);
   assertList('emojis.allow', config.emojis.allow);
   assertList('ascii.allow', config.ascii.allow);
+  if (config.tokens?.enabled) {
+    assertList('tokens.emoji.allow', config.tokens.emoji?.allow);
+  }
   if (!Number.isInteger(config.git.commitLength) || config.git.commitLength < 1 || config.git.commitLength > 64) {
     throw new Error('Invalid Estamper config: git.commitLength must be an integer from 1 to 64.');
   }

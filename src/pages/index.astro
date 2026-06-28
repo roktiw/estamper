@@ -56,6 +56,16 @@ roktiw@a1b2c3d</pre></div>
       </section>
 
       <section class="section container">
+        <div class="card" style="text-align:center">
+          <p class="eyebrow">Dogfooded by default</p>
+          <h2>This website is stamped by Estamper.</h2>
+          <p>The production build generates <code>public/estamper.json</code> before Astro builds, then mounts the same copyable badge that Estamper users add to their apps.</p>
+          <pre>bunx estamper generate --config estamper.config.yml --out public/estamper.json</pre>
+          <button id="copy-site-stamp" class="button primary" type="button">Copy this site's stamp</button>
+        </div>
+      </section>
+
+      <section class="section container">
         <h2>Everything a visible build stamp needs</h2>
         <ul class="feature-list">{features.map((feature) => <li>✅ {feature}</li>)}</ul>
       </section>
@@ -94,15 +104,6 @@ bunx estamper generate</pre></div>
       </section>
 
       <section class="section container">
-        <div class="card">
-          <p class="eyebrow">Dogfooding</p>
-          <h2>This site stamps itself.</h2>
-          <p>The production build generates <code>public/estamper.json</code> before Astro builds, then mounts the same copyable badge that Estamper users add to their apps.</p>
-          <pre>bunx estamper generate --config estamper.config.yml --out public/estamper.json</pre>
-        </div>
-      </section>
-
-      <section class="section container">
         <blockquote class="card"><p>“Make the deploy visible. The fastest bug triage is the screenshot that already contains the build identity.”</p><footer>— Estamper</footer></blockquote>
       </section>
     </main>
@@ -111,7 +112,7 @@ bunx estamper generate</pre></div>
     <script>
       const emojiStamp = 'stg-az-🍉-🛠️-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
       const asciiStamp = 'stg-az-WM-TL-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
-      const DEMO_MINUTE_DISPLAY_OFFSET = 42;
+      const demoTimeOffsetMinutes = 42;
       let emoji = true;
       const stamp = document.querySelector('#hero-stamp');
       const toggle = document.querySelector('#toggle-mode');
@@ -125,7 +126,7 @@ bunx estamper generate</pre></div>
       });
       const stampIntervalId = setInterval(() => {
         if (!stamp) return;
-        const minute = String((new Date().getMinutes() + DEMO_MINUTE_DISPLAY_OFFSET) % 60).padStart(2, '0');
+        const minute = String((new Date().getMinutes() + demoTimeOffsetMinutes) % 60).padStart(2, '0');
         stamp.textContent = (emoji ? emojiStamp : asciiStamp).replace('14:02', `14:${minute}`);
       }, 4000);
       const clearStampInterval = () => clearInterval(stampIntervalId);

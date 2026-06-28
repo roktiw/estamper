@@ -26,6 +26,15 @@ export async function loadConfig(path = 'estamper.config.yml'): Promise<Estamper
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
       throw new Error(`Could not load Estamper config ${path}: ${(error as Error).message}`);
     }
+    if (path === 'estamper.config.yml') {
+      try {
+        parsed = YAML.parse(await readFile('stampog.config.yml', 'utf8'));
+      } catch (fallbackError) {
+        if ((fallbackError as NodeJS.ErrnoException).code !== 'ENOENT') {
+          throw new Error(`Could not load Stampog config stampog.config.yml: ${(fallbackError as Error).message}`);
+        }
+      }
+    }
   }
 
   if (!isObject(parsed)) {

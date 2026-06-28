@@ -11,11 +11,24 @@
     document.body.append(badge);
   };
 
+  const wireCopyButton = (data) => {
+    document.querySelector('#copy-site-stamp')?.addEventListener('click', () => navigator.clipboard?.writeText(data.stamp).catch(() => undefined));
+  };
+
   fetch('/estamper.json')
     .then((res) => (res.ok ? res.json() : null))
     .then((data) => {
+      if (!data?.stamp) return;
+      wireCopyButton(data);
       import('estamper/browser')
-        .then(({ mountEstamper }) => mountEstamper({ stamp: data.stamp, details: data.parts, position: 'bottom-right', theme: 'auto' }))
+        .then(({ mountEstamper }) => mountEstamper({
+          stamp: data.stamp,
+          details: data.parts,
+          position: 'bottom-right',
+          theme: 'auto',
+          jsonUrl: '/estamper.json',
+          commitUrl: data.parts?.commit ? `https://github.com/roktiw/estamper-priv/commit/${data.parts.commit}` : undefined,
+        }))
         .catch(() => mountFallbackBadge(data));
     })
     .catch(() => undefined);

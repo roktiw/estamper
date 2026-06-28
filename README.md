@@ -154,6 +154,14 @@ Copy a template from `.github/workflow-templates/`, or add:
 - run: npx estamper generate --out public/estamper.json
 ```
 
+## Dogfooding
+
+The Estamper website is stamped by Estamper.
+
+Live stamp JSON:
+
+https://estamper.dev/estamper.json
+
 ## Examples
 
 - `examples/basic-html` — plain HTML badge

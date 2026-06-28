@@ -29,20 +29,32 @@ Usage:
 `);
 }
 
+function mapped(value: string | undefined, map: Record<string, string> | undefined, fallback: string | undefined): string | undefined {
+  const raw = value?.trim() || fallback;
+  return raw ? (map?.[raw] ?? raw) : undefined;
+}
+
 async function buildStamp(args: string[]) {
   const config = await loadConfig(argValue(args, '--config'));
   const git = getGitInfo(config.git.commitLength);
+  const envValue = config.env?.value === 'auto' ? (process.env.ESTAMPER_ENV ?? process.env.NODE_ENV) : config.env?.value;
+  const cloudValue = config.cloud?.provider === 'auto' ? (process.env.ESTAMPER_CLOUD ?? (process.env.GITHUB_ACTIONS ? 'github-pages' : process.env.VERCEL ? 'vercel' : undefined)) : config.cloud?.provider;
   return generateStamp({
     mode: config.mode,
     words: config.words.allow,
     emojis: config.emojis.allow,
     ascii: config.ascii.allow,
+    tokens: config.tokens?.enabled ? config.tokens.emoji?.allow : undefined,
     format: config.format,
+    env: config.env?.enabled ? mapped(envValue, config.env.map, config.env.fallback) : undefined,
+    cloud: config.cloud?.enabled ? mapped(cloudValue, config.cloud.map, config.cloud.fallback) : undefined,
     user: git.user,
     commit: git.commit,
     branch: config.git.includeBranch ? git.branch : undefined,
     dirty: config.git.includeDirty ? git.dirty : undefined,
-    dateTimezone: config.date.timezone,
+    dateFormat: config.date.format,
+    timezone: config.date.timezone,
+    timeFormat: config.time?.enabled ? config.time.format : undefined,
     seed: argValue(args, '--seed'),
   });
 }

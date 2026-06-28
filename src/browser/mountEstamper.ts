@@ -4,9 +4,11 @@ export interface MountEstamperOptions {
   stamp: string;
   target?: Element | string;
   position?: EstamperPosition;
-  theme?: 'light' | 'dark';
+  theme?: 'light' | 'dark' | 'auto';
   copyOnClick?: boolean;
   details?: Record<string, unknown>;
+  commitUrl?: string;
+  jsonUrl?: string;
 }
 
 const css = `
@@ -19,6 +21,9 @@ const css = `
 .estamper__badge{max-width:min(80vw,520px);overflow:hidden;text-overflow:ellipsis;border:0;border-radius:999px;padding:8px 12px;background:#111827;color:#f8fafc;box-shadow:0 8px 24px #0004;cursor:pointer}
 .estamper[data-theme="light"] .estamper__badge{background:#fff;color:#111827;border:1px solid #d1d5db}
 .estamper__panel{display:none;margin-top:8px;max-width:min(80vw,520px);border-radius:12px;padding:10px;background:#111827;color:#f8fafc;box-shadow:0 8px 24px #0005;white-space:pre-wrap;overflow-wrap:anywhere}
+.estamper__panel-title{font-weight:700;margin:0 0 8px}
+.estamper__actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.estamper__action{border:1px solid #374151;border-radius:999px;background:#1f2937;color:inherit;padding:5px 8px;text-decoration:none;cursor:pointer;font:inherit}
 .estamper[data-open="true"] .estamper__panel{display:block}
 .estamper__close{float:right;margin-left:8px}
 `;
@@ -42,6 +47,16 @@ function resolveTarget(target?: Element | string): { element: Element | null; se
     return { element: document.querySelector(target), selector: target };
   }
   return { element: target ?? document.body };
+}
+
+function label(value: unknown, labels: Record<string, string>): string {
+  return typeof value === 'string' ? (labels[value] ?? value) : String(value ?? '');
+}
+
+function appendLine(target: Element, name: string, value: unknown): void {
+  if (value === undefined || value === '') return;
+  target.append(`${name}: ${String(value)}
+`);
 }
 
 export function mountEstamper(options: MountEstamperOptions): HTMLElement {
@@ -73,7 +88,44 @@ export function mountEstamper(options: MountEstamperOptions): HTMLElement {
   close.type = 'button';
   close.textContent = '×';
   const details = doc.createElement('div');
-  details.textContent = JSON.stringify({ stamp: options.stamp, ...(options.details ?? {}) }, null, 2);
+  const data = options.details ?? {};
+  const title = doc.createElement('p');
+  title.className = 'estamper__panel-title';
+  title.textContent = 'Estamper build';
+  details.append(title, `Stamp:
+${options.stamp}
+
+`);
+  appendLine(details, 'Environment', label(data.env, { prd: 'production', pre: 'preview', dev: 'development', stg: 'staging' }));
+  appendLine(details, 'Platform', label(data.cloud, { ghp: 'GitHub Pages', vcl: 'Vercel', ntl: 'Netlify', loc: 'local' }));
+  appendLine(details, 'Commit', data.commit);
+  appendLine(details, 'Branch', data.branch);
+  appendLine(details, 'Actor', data.user);
+  appendLine(details, 'Built', [data.date, data.time].filter(Boolean).join(' '));
+  appendLine(details, 'Dirty', data.dirty);
+  const actions = doc.createElement('div');
+  actions.className = 'estamper__actions';
+  const copy = doc.createElement('button');
+  copy.className = 'estamper__action';
+  copy.type = 'button';
+  copy.textContent = 'Copy';
+  copy.addEventListener('click', () => void copyStamp(options.stamp));
+  actions.append(copy);
+  if (options.commitUrl) {
+    const commit = doc.createElement('a');
+    commit.className = 'estamper__action';
+    commit.href = options.commitUrl;
+    commit.textContent = 'Open commit';
+    actions.append(commit);
+  }
+  if (options.jsonUrl) {
+    const json = doc.createElement('a');
+    json.className = 'estamper__action';
+    json.href = options.jsonUrl;
+    json.textContent = 'View JSON';
+    actions.append(json);
+  }
+  details.append(actions);
   panel.append(close, details);
 
   badge.addEventListener('click', () => {
