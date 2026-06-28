@@ -49,6 +49,7 @@ const result = generateStamp({
 ```
 
 `seed` makes token selection deterministic; omit it for random stamps.
+Use `mode: 'auto'` with `emojiSupported: false` to produce the ASCII fallback with the same format placeholders.
 
 ## CLI
 
@@ -93,6 +94,7 @@ mountestamper({
 ```
 
 The widget has no framework dependency, renders with `textContent` instead of unsafe HTML injection, supports copy-on-click, and includes a small details panel.
+Pass `target: '#selector'` with `position: 'custom'` to mount the badge inside a specific element instead of a fixed viewport corner.
 
 ## Vite
 

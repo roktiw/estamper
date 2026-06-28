@@ -1,8 +1,8 @@
-export type StampogPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+export type StampogPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'custom';
 
 export interface MountStampogOptions {
   stamp: string;
-  target?: Element;
+  target?: Element | string;
   position?: StampogPosition;
   theme?: 'light' | 'dark';
   copyOnClick?: boolean;
@@ -15,6 +15,7 @@ const css = `
 .stampog[data-position="bottom-left"]{left:12px;bottom:12px}
 .stampog[data-position="top-right"]{right:12px;top:12px}
 .stampog[data-position="top-left"]{left:12px;top:12px}
+.stampog[data-position="custom"]{position:static;display:inline-block}
 .stampog__badge{max-width:min(80vw,520px);overflow:hidden;text-overflow:ellipsis;border:0;border-radius:999px;padding:8px 12px;background:#111827;color:#f8fafc;box-shadow:0 8px 24px #0004;cursor:pointer}
 .stampog[data-theme="light"] .stampog__badge{background:#fff;color:#111827;border:1px solid #d1d5db}
 .stampog__panel{display:none;margin-top:8px;max-width:min(80vw,520px);border-radius:12px;padding:10px;background:#111827;color:#f8fafc;box-shadow:0 8px 24px #0005;white-space:pre-wrap;overflow-wrap:anywhere}
@@ -36,11 +37,21 @@ export async function copyStamp(stamp: string, nav?: Navigator): Promise<string>
   return stamp;
 }
 
+function resolveTarget(target?: Element | string): { element: Element | null; selector?: string } {
+  if (typeof target === 'string') {
+    return { element: document.querySelector(target), selector: target };
+  }
+  return { element: target ?? document.body };
+}
+
 export function mountStampog(options: MountStampogOptions): HTMLElement {
   if (!options.stamp || options.stamp.length > 512) {
     throw new Error('Stampog requires a non-empty stamp up to 512 characters.');
   }
-  const target = options.target ?? document.body;
+  const { element: target, selector: targetSelector } = resolveTarget(options.target);
+  if (!target) {
+    throw new Error(`Stampog target was not found: ${targetSelector}`);
+  }
   const doc = target.ownerDocument;
   ensureStyle(doc);
 
