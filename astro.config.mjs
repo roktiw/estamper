@@ -6,7 +6,7 @@ export default defineConfig({
   outDir: './site-dist',
   integrations: [
     starlight({
-      title: 'Estamper',
+      title: 'estamper',
       description: 'Know exactly which deploy is on screen.',
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/roktiw/estamper-priv' }],
       sidebar: [

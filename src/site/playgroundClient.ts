@@ -16,6 +16,7 @@ type FieldElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 function shuffle<T>(values: T[]): T[] {
   const output = [...values];
+  // Fisher-Yates keeps demo regeneration unbiased while preserving the original lists.
   for (let index = output.length - 1; index > 0; index -= 1) {
     const swapIndex = Math.floor(Math.random() * (index + 1));
     [output[index], output[swapIndex]] = [output[swapIndex], output[index]];
@@ -32,7 +33,7 @@ export function mountPlayground(defaults: PlaygroundConfig): void {
   const action = (name: string): HTMLButtonElement | null => root.querySelector(`[data-action="${name}"]`);
   const list = (name: keyof PlaygroundConfig): string[] => String(field(name)?.value || '').split('\n').map((value) => value.trim()).filter(Boolean);
   const copy = (text: string | null | undefined) => navigator.clipboard?.writeText(text ?? '').catch((error: unknown) => {
-    console.warn('Could not copy Estamper playground output.', error);
+    console.warn('Could not copy Estamper playground output. Check browser clipboard permissions or copy manually.', error);
   });
 
   function readConfig(): PlaygroundConfig {

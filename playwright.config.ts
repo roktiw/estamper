@@ -6,7 +6,7 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:4321',
   },
   webServer: {
-    command: 'npm run build && ESTAMPER_ENV=prd ESTAMPER_CLOUD=ghp node dist/cli/index.js generate --config estamper.config.yml --out public/estamper.json && npm run site:build && npm run site:preview -- --host 127.0.0.1 --port 4321',
+    command: 'npm run site:e2e:server',
     url: 'http://127.0.0.1:4321',
     reuseExistingServer: !process.env.CI,
   },

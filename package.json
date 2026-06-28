@@ -29,7 +29,8 @@
     "prepack": "npm run build",
     "site:dev": "astro dev",
     "site:build": "astro build",
-    "site:preview": "astro preview"
+    "site:preview": "astro preview",
+    "site:e2e:server": "npm run build && ESTAMPER_ENV=prd ESTAMPER_CLOUD=ghp node dist/cli/index.js generate --config estamper.config.yml --out public/estamper.json && npm run site:build && npm run site:preview -- --host 127.0.0.1 --port 4321"
   },
   "dependencies": {
     "yaml": "^2.8.0"

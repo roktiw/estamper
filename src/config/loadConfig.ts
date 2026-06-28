@@ -28,10 +28,11 @@ export async function loadConfig(path = 'estamper.config.yml'): Promise<Estamper
     }
     if (path === 'estamper.config.yml') {
       try {
+        // Legacy fallback for projects created before the Estamper package rename.
         parsed = YAML.parse(await readFile('stampog.config.yml', 'utf8'));
       } catch (fallbackError) {
         if ((fallbackError as NodeJS.ErrnoException).code !== 'ENOENT') {
-          throw new Error(`Could not load Stampog config stampog.config.yml: ${(fallbackError as Error).message}`);
+          throw new Error(`Could not load legacy Estamper config stampog.config.yml: ${(fallbackError as Error).message}`);
         }
       }
     }

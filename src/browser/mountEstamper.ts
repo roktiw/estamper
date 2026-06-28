@@ -55,8 +55,7 @@ function label(value: unknown, labels: Record<string, string>): string {
 
 function appendLine(target: Element, name: string, value: unknown): void {
   if (value === undefined || value === '') return;
-  target.append(`${name}: ${String(value)}
-`);
+  target.append(`${name}: ${String(value)}\n`);
 }
 
 export function mountEstamper(options: MountEstamperOptions): HTMLElement {

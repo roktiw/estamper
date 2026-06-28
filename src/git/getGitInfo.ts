@@ -18,9 +18,9 @@ function git(args: string[]): string | undefined {
 
 export function getGitInfo(commitLength = 7): GitInfo {
   const gha = getGithubActionsInfo();
-  const commit = (gha.commit ?? git(['rev-parse', 'HEAD']) ?? 'unknown').slice(0, commitLength);
+  const commit = (gha.commit ?? git(['rev-parse', 'HEAD']) ?? '0000000').slice(0, commitLength);
   const branch = gha.branch ?? git(['rev-parse', '--abbrev-ref', 'HEAD']);
-  const user = gha.user ?? git(['config', 'user.name']) ?? 'unknown';
+  const user = gha.user ?? git(['config', 'user.name']) ?? 'anonymous';
   const status = git(['status', '--porcelain']) ?? '';
   return {
     commit,

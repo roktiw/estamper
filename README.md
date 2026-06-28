@@ -5,12 +5,16 @@ Tiny visible build stamps for web apps and games.
 ![Estamper demo](./docs/demo.svg)
 
 ```text
-🍉-🛠️-silver-river-2026-06-28-04:12:09-roktiw@a1b2c3d
+stg-az-🍉-🛠️-silver-river-2026-06-28-04:12-roktiw@a1b2c3d
 ```
 
 When QA sends a screenshot, you instantly know the exact build, commit, deploy time and actor.
 
-Estamper gives every deploy a tiny human-readable tattoo: emoji, words, timestamp, user, and commit.
+```text
+STG-AZ-WM-TL-silver-river-2026-06-28-04:12-roktiw@a1b2c3d
+```
+
+Estamper gives every deploy a tiny human-readable tattoo: env, cloud, emoji or ASCII tokens, words, timestamp, user, and commit.
 
 ## Quick start
 
@@ -54,7 +58,7 @@ QA: "No idea."
 After, the screenshot includes:
 
 ```text
-🍉-🛠️-silver-river-2026-06-28-04:12:09-roktiw@a1b2c3d
+stg-az-🍉-🛠️-silver-river-2026-06-28-04:12-roktiw@a1b2c3d
 ```
 
 You can see the deploy time, commit, actor, branch/dirty state, and exactly which build is on screen without opening DevTools.
@@ -70,6 +74,8 @@ import { generateStamp } from 'estamper';
 
 const result = generateStamp({
   mode: 'emoji',
+  env: 'stg',
+  cloud: 'az',
   words: ['silver', 'river', 'melon', 'orbit'],
   emojis: ['🍉', '🛠️', '🚀', '🐶'],
   ascii: ['WM', 'TL', 'RX', 'DG'],
@@ -80,8 +86,13 @@ const result = generateStamp({
 });
 ```
 
-`seed` makes token selection deterministic; omit it for random stamps.
-Use `mode: 'auto'` with `emojiSupported: false` to produce the ASCII fallback with the same format placeholders.
+Default stamps follow:
+
+```text
+[env]-[cloud]-[token1]-[token2]-[word1]-[word2]-[yyyy-mm-dd]-[hh:mm]-[user]@[commit]
+```
+
+`seed` makes token selection deterministic; without it, token selection is derived from the commit. Use `mode: 'auto'` with `emojiSupported: false` to produce the ASCII fallback with the same format placeholders.
 
 ## CLI
 
@@ -105,9 +116,16 @@ The default config lives in `estamper.config.yml`. YAML and JSON config files ar
 Important fields:
 
 - `mode`: `emoji`, `ascii`, or `auto`
-- `format`: token template, e.g. `{emoji1}-{emoji2}-{word1}-{word2}-{date}-{user}@{commit}`
+- `env`: explicit token or auto-detection from `VITE_ENV`, `NODE_ENV`, or `DEPLOY_ENV`
+- `cloud`: explicit provider or auto-detection from deployment environment variables such as `VERCEL`, `NETLIFY`, `AWS_REGION`, or `AZURE_CLIENT_ID`
+- `format`: token template, e.g. `{env}-{cloud}-{token1}-{token2}-{word1}-{word2}-{date}-{time}-{user}@{commit}`
+- `tokens.count`, `words.count`: 1–4 generated token/word segments
+- `date.format`: `yyyy-mm-dd`, `yy-mm-dd`, `mmdd`, `yyyymmdd`, or `iso-date`
+- `time.format`: `hh:mm`, `hh:mm:ss`, `hhmm`, `hhmmss`, or `unix`
 - `words.allow`, `emojis.allow`, `ascii.allow`: dictionaries used by the generator
 - `git.commitLength`: short commit length
+- `git.includeBranch`: opt-in branch suffix support; disabled by default
+- `git.includeDirty`: adds `~` to dirty local commits
 - `badge.position`: `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `custom`
 - `output`: default output paths
 
@@ -119,7 +137,7 @@ Config is validated with clear errors and capped token lists to avoid oversized 
 import { mountEstamper } from 'estamper/browser';
 
 mountEstamper({
-  stamp: '🍉-🛠️-silver-river-2026-06-28-04:12:09-roktiw@a1b2c3d',
+  stamp: 'stg-az-🍉-🛠️-silver-river-2026-06-28-04:12-roktiw@a1b2c3d',
   position: 'bottom-right',
   theme: 'dark',
 });
@@ -132,11 +150,11 @@ Pass `target: '#selector'` with `position: 'custom'` to mount the badge inside a
 
 ```js
 import { defineConfig } from 'vite';
-import { estamperVitePlugin } from 'estamper/vite';
+import { estamperVite } from 'estamper/vite';
 
 export default defineConfig({
   plugins: [
-    estamperVitePlugin({
+    estamperVite({
       config: './estamper.config.yml',
       inject: true,
       globalName: '__ESTAMPER__',

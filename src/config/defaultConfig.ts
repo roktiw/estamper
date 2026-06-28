@@ -1,45 +1,53 @@
 import { defaultAscii, defaultEmojis, defaultFormat, defaultWords } from '../core/defaults.js';
 import type { EstamperMode } from '../core/types.js';
 
+export interface EnvConfig {
+  enabled?: boolean;
+  value?: string;
+  auto?: boolean;
+  sources?: string[];
+  map?: Record<string, string>;
+  fallback?: string;
+}
+
+export interface CloudConfig {
+  enabled?: boolean;
+  provider?: string;
+  auto?: boolean;
+  sources?: string[];
+  map?: Record<string, string>;
+  fallback?: string;
+}
+
 export interface EstamperConfig {
   schemaVersion?: number;
   name: string;
   mode: EstamperMode;
   preset?: string;
   format: string;
-  env?: {
+  env: string | EnvConfig;
+  cloud: string | CloudConfig;
+  tokens: {
     enabled?: boolean;
-    value?: string;
-    fallback?: string;
-    map?: Record<string, string>;
-  };
-  cloud?: {
-    enabled?: boolean;
-    provider?: string;
-    fallback?: string;
-    map?: Record<string, string>;
-  };
-  date: {
-    format: string;
-    timezone: 'local' | 'utc';
-  };
-  time?: {
-    enabled?: boolean;
-    format?: string;
-    timezone?: 'local' | 'utc';
-  };
-  tokens?: {
-    enabled?: boolean;
-    count?: number;
+    count: number;
     mode?: string;
     asciiLength?: number;
     emoji?: { allow?: string[] };
     ascii?: { allow?: string[] };
     mappings?: unknown[];
   };
+  date: {
+    format: string;
+    timezone: 'local' | 'utc';
+  };
+  time: {
+    enabled: boolean;
+    format: string;
+    timezone: 'local' | 'utc';
+  };
   words: {
+    count: number;
     allow: string[];
-    count?: number;
     case?: string;
     output?: string;
     aliases?: unknown[];
@@ -54,6 +62,7 @@ export interface EstamperConfig {
     commitLength: number;
     includeBranch: boolean;
     includeDirty: boolean;
+    dirtyMarker: string;
     usernameSource: string;
     fallbackUsernameSource: string;
   };
@@ -73,40 +82,58 @@ export interface EstamperConfig {
 }
 
 export const defaultConfig: EstamperConfig = {
+  schemaVersion: 1,
   name: 'estamper',
   mode: 'emoji',
   format: defaultFormat,
   env: {
-    enabled: false,
+    enabled: true,
     value: 'auto',
-    fallback: 'dev',
+    auto: true,
+    sources: ['VITE_ENV', 'NODE_ENV', 'DEPLOY_ENV', 'ESTAMPER_ENV'],
     map: {
       production: 'prd',
       preview: 'pre',
+      staging: 'stg',
       development: 'dev',
+      test: 'tst',
     },
+    fallback: 'dev',
   },
   cloud: {
-    enabled: false,
+    enabled: true,
     provider: 'auto',
-    fallback: 'loc',
+    auto: true,
+    sources: [
+      'VERCEL',
+      'NETLIFY',
+      'GITHUB_ACTIONS',
+      'RAILWAY_ENVIRONMENT',
+      'FLY_APP_NAME',
+      'RENDER',
+      'CF_PAGES',
+      'GOOGLE_CLOUD_PROJECT',
+      'AWS_REGION',
+      'AZURE_CLIENT_ID',
+      'AZURE_SUBSCRIPTION_ID',
+      'ESTAMPER_CLOUD',
+    ],
     map: {
       'github-pages': 'ghp',
       vercel: 'vcl',
       netlify: 'ntl',
+      railway: 'rwy',
+      fly: 'fly',
+      render: 'rndr',
+      cloudflare: 'cfp',
+      gcp: 'gcp',
+      aws: 'aws',
+      azure: 'az',
     },
-  },
-  date: {
-    format: 'yyyy-mm-dd-hh:mm:ss',
-    timezone: 'local',
-  },
-  time: {
-    enabled: false,
-    format: 'hh:mm',
-    timezone: 'local',
+    fallback: 'loc',
   },
   tokens: {
-    enabled: false,
+    enabled: true,
     count: 2,
     mode: 'auto',
     asciiLength: 2,
@@ -118,7 +145,17 @@ export const defaultConfig: EstamperConfig = {
     },
     mappings: [],
   },
+  date: {
+    format: 'yyyy-mm-dd',
+    timezone: 'local',
+  },
+  time: {
+    enabled: true,
+    format: 'hh:mm',
+    timezone: 'local',
+  },
   words: {
+    count: 2,
     allow: defaultWords,
   },
   emojis: {
@@ -129,8 +166,9 @@ export const defaultConfig: EstamperConfig = {
   },
   git: {
     commitLength: 7,
-    includeBranch: true,
+    includeBranch: false,
     includeDirty: true,
+    dirtyMarker: '~',
     usernameSource: 'github',
     fallbackUsernameSource: 'git-config',
   },
