@@ -1,0 +1,42 @@
+{
+  "name": "stampog",
+  "version": "0.1.0",
+  "description": "Human-friendly build/version stamps for web apps and games.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "stampog": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./browser": "./dist/browser/index.js",
+    "./vite": "./dist/vite/index.js",
+    "./config": "./dist/config/index.js"
+  },
+  "files": [
+    "dist",
+    "stampog.config.yml",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^28.0.3",
+    "@types/node": "^20.19.0",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
