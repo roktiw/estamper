@@ -55,6 +55,15 @@ roktiw@a1b2c3d</pre></div>
       </section>
 
       <section class="section container">
+        <div class="card" style="text-align:center">
+          <p class="eyebrow">Dogfooded by default</p>
+          <h2>This website is stamped by Estamper.</h2>
+          <p>Look at the bottom-right corner — that badge was generated during this site's own build.</p>
+          <button id="copy-site-stamp" class="button primary" type="button">Copy this site's stamp</button>
+        </div>
+      </section>
+
+      <section class="section container">
         <h2>Everything a visible build stamp needs</h2>
         <ul class="feature-list">{features.map((feature) => <li>✅ {feature}</li>)}</ul>
       </section>
@@ -96,14 +105,19 @@ bunx estamper generate</pre></div>
       </section>
     </main>
     <footer class="site-footer"><div class="container"><strong>estamper.dev</strong><div class="nav-links"><a href="https://github.com/roktiw/estamper-priv">GitHub</a><a href="https://www.npmjs.com/package/estamper">npm</a><a href="https://x.com/roktiw">Twitter/X</a><a href="/docs/">Docs</a></div><span>MIT License · made by roktiw</span></div></footer>
-    <script>
+    <script type="module">
+      import { mountEstamper } from '../browser/index.js';
+
       const emojiStamp = 'stg-az-🍉-🛠️-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
       const asciiStamp = 'stg-az-WM-TL-silver-river-2026-06-28-14:02-roktiw@a1b2c3d';
       let emoji = true;
       const stamp = document.querySelector('#hero-stamp');
       const toggle = document.querySelector('#toggle-mode');
+      const siteStampButton = document.querySelector('#copy-site-stamp');
+      let siteStamp = '';
       const copy = (text) => navigator.clipboard?.writeText(text).catch(() => undefined);
       document.querySelector('#copy-stamp')?.addEventListener('click', () => copy(stamp?.textContent || emojiStamp));
+      siteStampButton?.addEventListener('click', () => copy(siteStamp));
       document.querySelectorAll('[data-copy]').forEach((button) => button.addEventListener('click', () => copy(button.getAttribute('data-copy') || '')));
       toggle?.addEventListener('click', () => {
         emoji = !emoji;
@@ -115,6 +129,21 @@ bunx estamper generate</pre></div>
         const minute = String((new Date().getMinutes() + 42) % 60).padStart(2, '0');
         stamp.textContent = (emoji ? emojiStamp : asciiStamp).replace('14:02', `14:${minute}`);
       }, 4000);
+
+      fetch('/estamper.json')
+        .then((res) => (res.ok ? res.json() : Promise.reject(new Error('Missing estamper.json'))))
+        .then((build) => {
+          siteStamp = build.stamp;
+          mountEstamper({
+            stamp: build.stamp,
+            details: build.parts,
+            position: 'bottom-right',
+            theme: 'auto',
+            jsonUrl: '/estamper.json',
+            commitUrl: build.parts?.commit ? `https://github.com/roktiw/estamper-priv/commit/${build.parts.commit}` : undefined,
+          });
+        })
+        .catch(() => undefined);
     </script>
   </body>
 </html>

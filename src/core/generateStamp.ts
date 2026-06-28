@@ -22,18 +22,26 @@ export function generateStamp(options: GenerateStampOptions = {}): StampResult {
   const words = cleanList(options.words, defaultWords);
   const emojis = cleanList(options.emojis, defaultEmojis);
   const ascii = cleanList(options.ascii, defaultAscii);
+  const tokens = cleanList(options.tokens, emojis);
   const [word1, word2] = pickTwo(words, picker);
   const [emoji1, emoji2] = pickTwo(emojis, picker);
   const [ascii1, ascii2] = pickTwo(ascii, picker);
+  const [token1, token2] = pickTwo(tokens, picker);
+  const date = options.date ?? new Date();
 
   const parts: StampParts = {
+    env: options.env,
+    cloud: options.cloud,
+    token1,
+    token2,
     emoji1,
     emoji2,
     ascii1,
     ascii2,
     word1,
     word2,
-    date: formatDate(options.date ?? new Date()),
+    date: formatDate(date, options.dateFormat, options.timezone),
+    time: options.timeFormat ? formatDate(date, options.timeFormat.replace('mm', 'min'), options.timezone) : undefined,
     user: options.user?.trim() || 'unknown',
     commit: (options.commit?.trim() || 'unknown').slice(0, 64),
     branch: options.branch,

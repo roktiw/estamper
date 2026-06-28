@@ -2,15 +2,47 @@ import { defaultAscii, defaultEmojis, defaultFormat, defaultWords } from '../cor
 import type { StampogMode } from '../core/types.js';
 
 export interface StampogConfig {
+  schemaVersion?: number;
   name: string;
   mode: StampogMode;
+  preset?: string;
   format: string;
+  env?: {
+    enabled?: boolean;
+    value?: string;
+    fallback?: string;
+    map?: Record<string, string>;
+  };
+  cloud?: {
+    enabled?: boolean;
+    provider?: string;
+    fallback?: string;
+    map?: Record<string, string>;
+  };
   date: {
     format: string;
     timezone: 'local' | 'utc';
   };
+  time?: {
+    enabled?: boolean;
+    format?: string;
+    timezone?: 'local' | 'utc';
+  };
+  tokens?: {
+    enabled?: boolean;
+    count?: number;
+    mode?: string;
+    asciiLength?: number;
+    emoji?: { allow?: string[] };
+    ascii?: { allow?: string[] };
+    mappings?: unknown[];
+  };
   words: {
     allow: string[];
+    count?: number;
+    case?: string;
+    output?: string;
+    aliases?: unknown[];
   };
   emojis: {
     allow: string[];
@@ -31,7 +63,7 @@ export interface StampogConfig {
     startVisible: boolean;
     copyOnClick: boolean;
     showDetailsOnClick: boolean;
-    theme: 'light' | 'dark';
+    theme: 'light' | 'dark' | 'auto';
   };
   output: {
     json: string;
@@ -44,9 +76,47 @@ export const defaultConfig: StampogConfig = {
   name: 'stampog',
   mode: 'emoji',
   format: defaultFormat,
+  env: {
+    enabled: false,
+    value: 'auto',
+    fallback: 'dev',
+    map: {
+      production: 'prd',
+      preview: 'pre',
+      development: 'dev',
+    },
+  },
+  cloud: {
+    enabled: false,
+    provider: 'auto',
+    fallback: 'loc',
+    map: {
+      'github-pages': 'ghp',
+      vercel: 'vcl',
+      netlify: 'ntl',
+    },
+  },
   date: {
     format: 'yyyy-mm-dd-hh:mm:ss',
     timezone: 'local',
+  },
+  time: {
+    enabled: false,
+    format: 'hh:mm',
+    timezone: 'local',
+  },
+  tokens: {
+    enabled: false,
+    count: 2,
+    mode: 'auto',
+    asciiLength: 2,
+    emoji: {
+      allow: defaultEmojis,
+    },
+    ascii: {
+      allow: defaultAscii,
+    },
+    mappings: [],
   },
   words: {
     allow: defaultWords,

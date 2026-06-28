@@ -17,7 +17,7 @@ function mergeDeep(base: Record<string, unknown>, override: Record<string, unkno
   return output;
 }
 
-export async function loadConfig(path = 'stampog.config.yml'): Promise<StampogConfig> {
+export async function loadConfig(path = 'estamper.config.yml'): Promise<StampogConfig> {
   let parsed: unknown = {};
   try {
     const source = await readFile(path, 'utf8');
@@ -25,6 +25,15 @@ export async function loadConfig(path = 'stampog.config.yml'): Promise<StampogCo
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
       throw new Error(`Could not load Stampog config ${path}: ${(error as Error).message}`);
+    }
+    if (path === 'estamper.config.yml') {
+      try {
+        parsed = YAML.parse(await readFile('stampog.config.yml', 'utf8'));
+      } catch (fallbackError) {
+        if ((fallbackError as NodeJS.ErrnoException).code !== 'ENOENT') {
+          throw new Error(`Could not load Stampog config stampog.config.yml: ${(fallbackError as Error).message}`);
+        }
+      }
     }
   }
 

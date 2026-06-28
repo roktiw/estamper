@@ -25,10 +25,10 @@ npx estamper generate --out public/estamper.json
 ```
 
 ```js
-import { mountestamper } from 'estamper/browser';
+import { mountEstamper } from 'estamper/browser';
 import stamp from './estamper.json' assert { type: 'json' };
 
-mountestamper({ stamp: stamp.stamp, position: 'bottom-right' });
+mountEstamper({ stamp: stamp.stamp, position: 'bottom-right' });
 ```
 
 ## Core API
@@ -83,9 +83,9 @@ Config is validated with clear errors and capped token lists to avoid oversized 
 ## Browser badge
 
 ```js
-import { mountestamper } from 'estamper/browser';
+import { mountEstamper } from 'estamper/browser';
 
-mountestamper({
+mountEstamper({
   stamp: '🍉-🛠️-silver-river-2026-06-28-04:12:09-roktiw@a1b2c3d',
   position: 'bottom-right',
   theme: 'dark',
@@ -119,6 +119,14 @@ Copy a template from `.github/workflow-templates/`, or add:
 ```yaml
 - run: npx estamper generate --out public/estamper.json
 ```
+
+## Dogfooding
+
+The Estamper website is stamped by Estamper.
+
+Live stamp JSON:
+
+https://estamper.dev/estamper.json
 
 ## Examples
 

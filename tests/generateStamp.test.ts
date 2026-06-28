@@ -42,4 +42,23 @@ describe('generateStamp', () => {
     });
     expect(result.stamp).toBe('silver/a1b2c3d/roktiw');
   });
+
+  it('supports Estamper website dogfooding fields', () => {
+    const result = generateStamp({
+      format: '{env}-{cloud}-{token1}-{token2}-{word1}-{word2}-{date}-{time}-{user}@{commit}',
+      env: 'prd',
+      cloud: 'ghp',
+      tokens: ['🏷️', '✅'],
+      words: ['silver', 'river'],
+      date: new Date(Date.UTC(2026, 5, 28, 14, 2, 9)),
+      dateFormat: 'yyyy-mm-dd',
+      timeFormat: 'hh:mm',
+      timezone: 'utc',
+      user: 'roktiw',
+      commit: 'a1b2c3d',
+      seed: 'dogfood',
+    });
+    expect(result.stamp).toMatch(/^prd-ghp-(🏷️|✅)-(🏷️|✅)-(silver|river)-(silver|river)-2026-06-28-14:02-roktiw@a1b2c3d$/);
+    expect(result.parts).toMatchObject({ env: 'prd', cloud: 'ghp', date: '2026-06-28', time: '14:02' });
+  });
 });

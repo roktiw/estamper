@@ -5,6 +5,7 @@
   "type": "module",
   "license": "MIT",
   "bin": {
+    "estamper": "./dist/cli/index.js",
     "stampog": "./dist/cli/index.js"
   },
   "exports": {
@@ -23,6 +24,7 @@
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "typecheck": "tsc --noEmit",
     "prepack": "npm run build",
     "site:dev": "astro dev",
@@ -34,6 +36,7 @@
   },
   "devDependencies": {
     "@astrojs/starlight": "^0.41.1",
+    "@playwright/test": "^1.61.1",
     "@types/jsdom": "^28.0.3",
     "@types/node": "^20.19.0",
     "astro": "^7.0.3",

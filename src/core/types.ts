@@ -1,6 +1,10 @@
 export type StampogMode = 'emoji' | 'ascii' | 'auto';
 
 export interface StampParts {
+  env?: string;
+  cloud?: string;
+  token1?: string;
+  token2?: string;
   emoji1?: string;
   emoji2?: string;
   ascii1?: string;
@@ -8,6 +12,7 @@ export interface StampParts {
   word1: string;
   word2: string;
   date: string;
+  time?: string;
   user: string;
   commit: string;
   branch?: string;
@@ -30,6 +35,12 @@ export interface GenerateStampOptions {
   branch?: string;
   dirty?: boolean;
   date?: Date;
+  dateFormat?: string;
+  timeFormat?: string;
+  timezone?: 'local' | 'utc';
+  env?: string;
+  cloud?: string;
+  tokens?: string[];
   seed?: string | number;
   format?: string;
   maxLength?: number;
