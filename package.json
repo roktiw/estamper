@@ -24,14 +24,19 @@
     "build": "tsc",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "site:dev": "astro dev",
+    "site:build": "astro build",
+    "site:preview": "astro preview"
   },
   "dependencies": {
     "yaml": "^2.8.0"
   },
   "devDependencies": {
+    "@astrojs/starlight": "^0.41.1",
     "@types/jsdom": "^28.0.3",
     "@types/node": "^20.19.0",
+    "astro": "^7.0.3",
     "jsdom": "^25.0.1",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"

@@ -1,7 +1,7 @@
 import type { EstamperConfig } from './defaultConfig.js';
 
 const modes = new Set(['emoji', 'ascii', 'auto']);
-const positions = new Set(['top-left', 'top-right', 'bottom-left', 'bottom-right']);
+const positions = new Set(['top-left', 'top-right', 'bottom-left', 'bottom-right', 'custom']);
 
 function assertList(name: string, value: unknown): asserts value is string[] {
   if (!Array.isArray(value) || value.length === 0) {

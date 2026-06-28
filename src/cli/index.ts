@@ -37,11 +37,12 @@ async function buildStamp(args: string[]) {
     words: config.words.allow,
     emojis: config.emojis.allow,
     ascii: config.ascii.allow,
-    format: config.mode === 'ascii' ? config.format.replaceAll('emoji', 'ascii') : config.format,
+    format: config.format,
     user: git.user,
     commit: git.commit,
     branch: config.git.includeBranch ? git.branch : undefined,
     dirty: config.git.includeDirty ? git.dirty : undefined,
+    dateTimezone: config.date.timezone,
     seed: argValue(args, '--seed'),
   });
 }

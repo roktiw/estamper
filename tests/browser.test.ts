@@ -20,4 +20,23 @@ describe('browser badge', () => {
     await expect(copyStamp('stamp', nav)).resolves.toBe('stamp');
     expect(copied).toEqual(['stamp']);
   });
+
+  it('mounts into a custom selector target', () => {
+    const dom = new JSDOM('<!doctype html><html><head></head><body><main id="badge"></main></body></html>', {
+      url: 'https://example.test',
+    });
+    const previousDocument = globalThis.document;
+    globalThis.document = dom.window.document;
+    try {
+      const root = mountEstamper({
+        stamp: 'custom-target',
+        target: '#badge',
+        position: 'custom',
+      });
+      expect(dom.window.document.querySelector('#badge > .estamper')).toBe(root);
+      expect(root.dataset.position).toBe('custom');
+    } finally {
+      globalThis.document = previousDocument;
+    }
+  });
 });

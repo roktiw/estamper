@@ -27,7 +27,7 @@ export interface EstamperConfig {
   };
   badge: {
     enabled: boolean;
-    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'custom';
     startVisible: boolean;
     copyOnClick: boolean;
     showDetailsOnClick: boolean;

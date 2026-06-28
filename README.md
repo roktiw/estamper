@@ -67,6 +67,7 @@ const result = generateStamp({
 ```
 
 `seed` makes token selection deterministic; omit it for random stamps.
+Use `mode: 'auto'` with `emojiSupported: false` to produce the ASCII fallback with the same format placeholders.
 
 ## CLI
 
@@ -93,7 +94,7 @@ Important fields:
 - `format`: token template, e.g. `{emoji1}-{emoji2}-{word1}-{word2}-{date}-{user}@{commit}`
 - `words.allow`, `emojis.allow`, `ascii.allow`: dictionaries used by the generator
 - `git.commitLength`: short commit length
-- `badge.position`: `top-left`, `top-right`, `bottom-left`, `bottom-right`
+- `badge.position`: `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `custom`
 - `output`: default output paths
 
 Config is validated with clear errors and capped token lists to avoid oversized output.
@@ -111,6 +112,7 @@ mountEstamper({
 ```
 
 The widget has no framework dependency, renders with `textContent` instead of unsafe HTML injection, supports copy-on-click, and includes a small details panel.
+Pass `target: '#selector'` with `position: 'custom'` to mount the badge inside a specific element instead of a fixed viewport corner.
 
 ## Vite
 

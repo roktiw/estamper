@@ -1,0 +1,9 @@
+---
+import '../styles/site.css';
+const examples = ['Plain HTML', 'Vite + Vue', 'Vite + React', 'SvelteKit', 'Next.js', 'Astro', 'Web game (canvas)', 'GitHub Pages', 'Firebase Hosting', 'Vercel', 'Netlify', 'Python / FastAPI', '.NET / Blazor', 'Ruby on Rails'];
+---
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><title>Estamper examples</title><link rel="icon" href="/favicon.svg" /></head><body>
+<nav class="site-nav"><div class="container"><a class="logo" href="/">🍉 Estamper</a><div class="nav-links"><a href="/docs/">Docs</a><a href="/playground/">Playground</a><a href="/changelog/">Changelog</a></div></div></nav>
+<main class="container section"><p class="eyebrow">Examples</p><h1 style="font-size:clamp(2.8rem,7vw,5rem)">Use Estamper anywhere</h1><p class="lede" style="margin-left:0">Each example documents the problem, package setup, code, and where a live demo or repository link should go.</p><div class="grid">{examples.map((name) => <article class="card"><h2 style="font-size:1.35rem">{name}</h2><p>Add a visible deploy stamp, write it to <code>estamper.json</code>, then mount the browser badge or render the value in your template.</p><pre>npx estamper generate --out public/estamper.json</pre></article>)}</div></main>
+<footer class="site-footer"><div class="container"><strong>estamper.dev</strong><span>MIT License · made by roktiw</span></div></footer>
+</body></html>

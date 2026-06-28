@@ -30,7 +30,9 @@ export interface GenerateStampOptions {
   branch?: string;
   dirty?: boolean;
   date?: Date;
+  dateTimezone?: 'local' | 'utc';
   seed?: string | number;
   format?: string;
   maxLength?: number;
+  emojiSupported?: boolean;
 }
