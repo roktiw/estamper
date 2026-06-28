@@ -14,8 +14,7 @@
   fetch('/estamper.json')
     .then((res) => (res.ok ? res.json() : null))
     .then((data) => {
-      const browserEntry = 'estamper/browser';
-      import(browserEntry)
+      import('estamper/browser')
         .then(({ mountEstamper }) => mountEstamper({ stamp: data.stamp, details: data.parts, position: 'bottom-right', theme: 'auto' }))
         .catch(() => mountFallbackBadge(data));
     })

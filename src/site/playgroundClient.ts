@@ -37,6 +37,9 @@ export function mountPlayground(defaults: PlaygroundConfig): void {
 
   function readConfig(): PlaygroundConfig {
     const modeValue = field('mode')?.value;
+    const asciiLengthValue = Number(field('asciiLength')?.value || defaults.asciiLength);
+    let asciiLength: 2 | 3 = 2;
+    if (asciiLengthValue === 3) asciiLength = 3;
     return {
       env: field('env')?.value || defaults.env,
       cloud: field('cloud')?.value || defaults.cloud,
@@ -54,7 +57,7 @@ export function mountPlayground(defaults: PlaygroundConfig): void {
       preset: (field('preset')?.value || 'standard') as PlaygroundPreset,
       tokenCount: Number(field('tokenCount')?.value || defaults.tokenCount),
       wordCount: Number(field('wordCount')?.value || defaults.wordCount),
-      asciiLength: Number(field('asciiLength')?.value || defaults.asciiLength) === 3 ? 3 : 2,
+      asciiLength,
       commitLength: Number(field('commitLength')?.value || defaults.commitLength),
       badgePosition: (field('badgePosition')?.value || defaults.badgePosition) as PlaygroundConfig['badgePosition'],
       theme: (field('theme')?.value || defaults.theme) as PlaygroundConfig['theme'],

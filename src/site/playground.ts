@@ -84,8 +84,8 @@ export function buildPlaygroundStamp(config: PlaygroundConfig): string {
   const segments = [
     config.env.trim() || defaultPlaygroundConfig.env,
     config.cloud.trim() || defaultPlaygroundConfig.cloud,
-    ...Array.from({ length: tokenCount }, (_, index) => visualTokens[index % visualTokens.length] ?? defaultPlaygroundConfig.emojis[index % 2]),
-    ...Array.from({ length: wordCount }, (_, index) => words[index % words.length] ?? defaultPlaygroundConfig.words[index % 2]),
+    ...Array.from({ length: tokenCount }, (_, index) => visualTokens[index % visualTokens.length]),
+    ...Array.from({ length: wordCount }, (_, index) => words[index % words.length]),
     `${config.date || defaultPlaygroundConfig.date}-${config.time || defaultPlaygroundConfig.time}`,
   ];
   const suffixes = [
