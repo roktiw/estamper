@@ -1,6 +1,6 @@
-# Stampog
+# estamper
 
-Stampog is a tiny ESM-first package for human-friendly build/version stamps in web apps and games.
+estamper is a tiny ESM-first package for human-friendly build/version stamps in web apps and games.
 
 Example stamp:
 
@@ -19,22 +19,22 @@ It answers: “Which exact build am I looking at?” without DevTools or guessin
 ## Quick start
 
 ```bash
-npm install -D stampog
-npx stampog init
-npx stampog generate --out public/stampog.json
+npm install -D estamper
+npx estamper init
+npx estamper generate --out public/estamper.json
 ```
 
 ```js
-import { mountStampog } from 'stampog/browser';
-import stamp from './stampog.json' assert { type: 'json' };
+import { mountestamper } from 'estamper/browser';
+import stamp from './estamper.json' assert { type: 'json' };
 
-mountStampog({ stamp: stamp.stamp, position: 'bottom-right' });
+mountestamper({ stamp: stamp.stamp, position: 'bottom-right' });
 ```
 
 ## Core API
 
 ```js
-import { generateStamp } from 'stampog';
+import { generateStamp } from 'estamper';
 
 const result = generateStamp({
   mode: 'emoji',
@@ -53,21 +53,21 @@ const result = generateStamp({
 ## CLI
 
 ```bash
-stampog --help
-stampog init
-stampog validate-config --config stampog.config.yml
-stampog generate --config stampog.config.yml --out public/stampog.json
-stampog generate --out public/stampog.json --js public/stampog.js --html public/stampog.html
-stampog print
-stampog json
-stampog html --out public/stampog.html
+estamper --help
+estamper init
+estamper validate-config --config estamper.config.yml
+estamper generate --config estamper.config.yml --out public/estamper.json
+estamper generate --out public/estamper.json --js public/estamper.js --html public/estamper.html
+estamper print
+estamper json
+estamper html --out public/estamper.html
 ```
 
 The CLI reads `GITHUB_SHA`, `GITHUB_ACTOR`, and `GITHUB_REF_NAME` in GitHub Actions. Outside CI it falls back to local `git` and `git config user.name`; if git is unavailable, safe `unknown` values are used.
 
 ## Config
 
-The default config lives in `stampog.config.yml`. YAML and JSON config files are supported.
+The default config lives in `estamper.config.yml`. YAML and JSON config files are supported.
 
 Important fields:
 
@@ -83,9 +83,9 @@ Config is validated with clear errors and capped token lists to avoid oversized 
 ## Browser badge
 
 ```js
-import { mountStampog } from 'stampog/browser';
+import { mountestamper } from 'estamper/browser';
 
-mountStampog({
+mountestamper({
   stamp: '🍉-🛠️-silver-river-2026-06-28-04:12:09-roktiw@a1b2c3d',
   position: 'bottom-right',
   theme: 'dark',
@@ -98,14 +98,14 @@ The widget has no framework dependency, renders with `textContent` instead of un
 
 ```js
 import { defineConfig } from 'vite';
-import { stampogVitePlugin } from 'stampog/vite';
+import { estamperVitePlugin } from 'estamper/vite';
 
 export default defineConfig({
   plugins: [
-    stampogVitePlugin({
-      config: './stampog.config.yml',
+    estamperVitePlugin({
+      config: './estamper.config.yml',
       inject: true,
-      globalName: '__STAMPOG__',
+      globalName: '__estamper__',
       meta: true,
     }),
   ],
@@ -117,7 +117,7 @@ export default defineConfig({
 Copy a template from `.github/workflow-templates/`, or add:
 
 ```yaml
-- run: npx stampog generate --out public/stampog.json
+- run: npx estamper generate --out public/estamper.json
 ```
 
 ## Examples
@@ -128,12 +128,12 @@ Copy a template from `.github/workflow-templates/`, or add:
 
 ## Security notes
 
-Stampog does not execute code from config, does not send data externally, limits config sizes and stamp length, and avoids unsafe DOM rendering for user-controlled strings.
+estamper does not execute code from config, does not send data externally, limits config sizes and stamp length, and avoids unsafe DOM rendering for user-controlled strings.
 
 ## Relation to Debugog
 
-Stampog can be passed into tools such as Debugog:
+estamper can be passed into tools such as Debugog:
 
 ```js
-new Debugog({ build: stampog.stamp });
+new Debugog({ build: estamper.stamp });
 ```
