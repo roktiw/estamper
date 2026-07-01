@@ -37,10 +37,10 @@ export function estamperVitePlugin(options: EstamperVitePluginOptions = {}) {
     name: 'estamper',
     async buildStart() {
       const config = await loadConfig(options.config);
-      const git = getGitInfo(config.git.commitLength);
+      const git = getGitInfo(config.commit.length);
       const result = generateStamp(resolveStampOptions(config, git));
       stamp = result.stamp;
-      const out = options.out ?? 'public/estamper.json';
+      const out = options.out ?? config.output.json;
       await mkdir(dirname(out), { recursive: true });
       await writeFile(out, `${JSON.stringify(result, null, 2)}\n`, 'utf8');
     },

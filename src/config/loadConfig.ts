@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { extname } from 'node:path';
 import YAML from 'yaml';
-import { defaultConfig, type EstamperConfig } from './defaultConfig.js';
+import { defaultConfig, type StampogConfig } from './defaultConfig.js';
 import { validateConfig } from './schema.js';
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -17,24 +17,47 @@ function mergeDeep(base: Record<string, unknown>, override: Record<string, unkno
   return output;
 }
 
-export async function loadConfig(path = 'estamper.config.yml'): Promise<EstamperConfig> {
+function applyLegacyAliases(config: StampogConfig, parsed: Record<string, unknown>): StampogConfig {
+  const legacyEmojis = parsed.emojis;
+  if (isObject(legacyEmojis) && Array.isArray(legacyEmojis.allow)) {
+    config.tokens.emoji.allow = legacyEmojis.allow as string[];
+  }
+  const legacyAscii = parsed.ascii;
+  if (isObject(legacyAscii) && Array.isArray(legacyAscii.allow)) {
+    config.tokens.ascii.allow = legacyAscii.allow as string[];
+  }
+  const legacyGit = parsed.git;
+  if (isObject(legacyGit)) {
+    if (Number.isInteger(legacyGit.commitLength)) config.commit.length = legacyGit.commitLength as number;
+    if (typeof legacyGit.includeBranch === 'boolean') config.branch.enabled = legacyGit.includeBranch;
+    if (typeof legacyGit.includeDirty === 'boolean') config.commit.includeDirty = legacyGit.includeDirty;
+  }
+  if (parsed.mode === 'ascii') config.tokens.mode = 'ascii';
+  return config;
+}
+
+async function readConfig(path: string): Promise<unknown> {
+  const source = await readFile(path, 'utf8');
+  return extname(path).toLowerCase() === '.json' ? JSON.parse(source) : YAML.parse(source);
+}
+
+export async function loadConfig(path = 'estamper.config.yml'): Promise<StampogConfig> {
   let parsed: unknown = {};
+  let loadedPath = path;
   try {
-    const source = await readFile(path, 'utf8');
-    parsed = extname(path).toLowerCase() === '.json' ? JSON.parse(source) : YAML.parse(source);
+    parsed = await readConfig(path);
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-      throw new Error(`Could not load Estamper config ${path}: ${(error as Error).message}`);
-    }
-    if (path === 'estamper.config.yml') {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT' && path === 'estamper.config.yml') {
       try {
-        // Legacy fallback for projects created before the Estamper package rename.
-        parsed = YAML.parse(await readFile('stampog.config.yml', 'utf8'));
+        loadedPath = 'stampog.config.yml';
+        parsed = await readConfig(loadedPath);
       } catch (fallbackError) {
         if ((fallbackError as NodeJS.ErrnoException).code !== 'ENOENT') {
-          throw new Error(`Could not load legacy Estamper config stampog.config.yml: ${(fallbackError as Error).message}`);
+          throw new Error(`Could not load Estamper config ${loadedPath}: ${(fallbackError as Error).message}`);
         }
       }
+    } else if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      throw new Error(`Could not load Estamper config ${path}: ${(error as Error).message}`);
     }
   }
 
@@ -42,5 +65,6 @@ export async function loadConfig(path = 'estamper.config.yml'): Promise<Estamper
     throw new Error('Invalid Estamper config: root value must be an object.');
   }
 
-  return validateConfig(mergeDeep(defaultConfig as unknown as Record<string, unknown>, parsed) as unknown as EstamperConfig);
+  const merged = mergeDeep(defaultConfig as unknown as Record<string, unknown>, parsed) as unknown as StampogConfig;
+  return validateConfig(applyLegacyAliases(merged, parsed));
 }

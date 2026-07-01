@@ -53,6 +53,35 @@ describe('generateStamp', () => {
     expect(result.stamp).toMatch(/^(WM|TL)-(WM|TL)-/);
   });
 
+  it('uses emoji to ASCII mappings with requested length', () => {
+    const result = generateStamp({
+      mode: 'ascii',
+      tokenCount: 2,
+      asciiLength: 3,
+      words: ['silver', 'river'],
+      date,
+      user: 'roktiw',
+      commit: 'a1b2c3d',
+      seed: 'mapping',
+      format: '{token1}-{token2}',
+    });
+    expect(result.stamp).toMatch(/^[A-Z]{3,4}-[A-Z]{3,4}$/);
+  });
+
+  it('supports compact word aliases', () => {
+    const result = generateStamp({
+      words: ['silver', 'river'],
+      wordCase: 'code3',
+      tokenCount: 0,
+      date,
+      user: 'roktiw',
+      commit: 'a1b2c3d',
+      seed: 'words',
+      format: '{word1}-{word2}',
+    });
+    expect(result.stamp).toMatch(/^(SLV|RVR)-(SLV|RVR)$/);
+  });
+
   it('supports UTC date formatting', () => {
     const result = generateStamp({
       date: new Date('2026-06-28T04:12:09Z'),
@@ -76,9 +105,9 @@ describe('generateStamp', () => {
     expect(result.stamp).toBe('dev-🍉-🍉-silver-silver-2026-06-28-roktiw@a1b2c3d~');
   });
 
-  it('supports custom formats', () => {
+  it('supports custom formats and removes missing separators', () => {
     const result = generateStamp({
-      format: '{word1}/{commit}/{user}',
+      format: '{word1}/{commit}/{branch}-{user}',
       words: ['silver'],
       date,
       user: 'roktiw',

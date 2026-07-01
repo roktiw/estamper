@@ -32,8 +32,14 @@ Usage:
 
 async function buildStamp(args: string[]) {
   const config = await loadConfig(argValue(args, '--config'));
-  const git = getGitInfo(config.git.commitLength);
-  return generateStamp(resolveStampOptions(config, git, argValue(args, '--seed')));
+  const git = getGitInfo(config.commit.length);
+  if (config.validation.requireGit && git.commit === 'unknown') {
+    throw new Error('Invalid Estamper runtime: git metadata is required but unavailable.');
+  }
+  if (config.validation.requireCommit && git.commit === 'unknown') {
+    throw new Error('Invalid Estamper runtime: commit metadata is required but unavailable.');
+  }
+  return { config, stamp: generateStamp(resolveStampOptions(config, git, argValue(args, '--seed'))) };
 }
 
 async function main(args: string[]): Promise<void> {
@@ -56,7 +62,7 @@ async function main(args: string[]): Promise<void> {
     return;
   }
 
-  const stamp = await buildStamp(args);
+  const { config, stamp } = await buildStamp(args);
   if (command === 'print') {
     console.log(stamp.stamp);
     return;
@@ -66,13 +72,13 @@ async function main(args: string[]): Promise<void> {
     return;
   }
   if (command === 'html') {
-    await writeHtml(argValue(args, '--out') ?? 'dist/estamper-snippet.html', stamp);
+    await writeHtml(argValue(args, '--out') ?? config.output.htmlSnippet, stamp);
     return;
   }
   if (command === 'generate') {
-    await writeJson(argValue(args, '--out') ?? 'dist/estamper.json', stamp);
-    if (argValue(args, '--js')) await writeJs(argValue(args, '--js')!, stamp);
-    if (argValue(args, '--html')) await writeHtml(argValue(args, '--html')!, stamp);
+    await writeJson(argValue(args, '--out') ?? config.output.json, stamp);
+    if (argValue(args, '--js')) await writeJs(argValue(args, '--js') ?? config.output.js, stamp);
+    if (argValue(args, '--html')) await writeHtml(argValue(args, '--html') ?? config.output.htmlSnippet, stamp);
     console.log(stamp.stamp);
     return;
   }
