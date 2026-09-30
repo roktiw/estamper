@@ -1,6 +1,6 @@
 import { JSDOM } from 'jsdom';
 import { describe, expect, it } from 'vitest';
-import { copyStamp, mountEstamper } from '../src/browser/index.js';
+import { closeEstamperDetails, copyStamp, mountEstamper, openEstamperDetails } from '../src/browser/index.js';
 
 describe('browser badge', () => {
   it('creates a safe badge', () => {
@@ -29,6 +29,17 @@ describe('browser badge', () => {
     expect(root.querySelector<HTMLAnchorElement>('a[href="/estamper.json"]')?.textContent).toBe('View JSON');
   });
 
+  it('shows Firebase as platform label for cloud=fb', () => {
+    const dom = new JSDOM('<!doctype html><html><head></head><body></body></html>');
+    const root = mountEstamper({
+      stamp: 'stg-fb-🚀-🧪-ocean-spark-2026-09-30-12:00-roktiw@abc1234',
+      target: dom.window.document.body,
+      details: { env: 'stg', cloud: 'fb' },
+      rootId: 'estamper-fb-test',
+    });
+    expect(root.querySelector('.estamper__panel')?.textContent).toContain('Firebase');
+  });
+
   it('copy function returns the stamp', async () => {
     const copied: string[] = [];
     const nav = { clipboard: { writeText: async (value: string) => { copied.push(value); } } } as Navigator;
@@ -47,11 +58,42 @@ describe('browser badge', () => {
         stamp: 'custom-target',
         target: '#badge',
         position: 'custom',
+        rootId: 'estamper-custom',
       });
       expect(dom.window.document.querySelector('#badge > .estamper')).toBe(root);
       expect(root.dataset.position).toBe('custom');
     } finally {
       globalThis.document = previousDocument;
     }
+  });
+
+  it('deduplicates: calling mountEstamper twice with the same rootId replaces the widget', () => {
+    const dom = new JSDOM('<!doctype html><html><head></head><body></body></html>');
+    const body = dom.window.document.body;
+    mountEstamper({ stamp: 'first-stamp', target: body, rootId: 'estamper-dedup' });
+    mountEstamper({ stamp: 'second-stamp', target: body, rootId: 'estamper-dedup' });
+    const roots = body.querySelectorAll('#estamper-dedup');
+    expect(roots.length).toBe(1);
+    expect(roots[0]?.querySelector('.estamper__badge')?.textContent).toBe('second-stamp');
+  });
+
+  it('openEstamperDetails / closeEstamperDetails control the panel via rootId', () => {
+    const dom = new JSDOM('<!doctype html><html><head></head><body></body></html>');
+    const root = mountEstamper({
+      stamp: 'ctrl-stamp',
+      target: dom.window.document.body,
+      rootId: 'estamper-ctrl',
+    });
+    expect(root.dataset.open).toBe('false');
+    openEstamperDetails('estamper-ctrl', dom.window.document);
+    expect(root.dataset.open).toBe('true');
+    closeEstamperDetails('estamper-ctrl', dom.window.document);
+    expect(root.dataset.open).toBe('false');
+  });
+
+  it('openEstamperDetails returns false when element not found', () => {
+    const dom = new JSDOM('<!doctype html><html><head></head><body></body></html>');
+    const result = openEstamperDetails('nonexistent', dom.window.document);
+    expect(result).toBe(false);
   });
 });

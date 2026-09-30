@@ -9,9 +9,14 @@ export interface MountEstamperOptions {
   details?: Record<string, unknown>;
   commitUrl?: string;
   jsonUrl?: string;
+  /** Unique DOM id for the root element. Defaults to 'estamper-root'.
+   *  If an element with this id already exists it is removed before mounting,
+   *  preventing duplicates on hot-reload or React re-renders. */
+  rootId?: string;
 }
 
 const css = `
+@keyframes estamper-fade-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .estamper{position:fixed;z-index:2147483647;font:12px/1.4 system-ui,sans-serif;color:#f8fafc}
 .estamper[data-position="bottom-right"]{right:12px;bottom:12px}
 .estamper[data-position="bottom-left"]{left:12px;bottom:12px}
@@ -24,7 +29,7 @@ const css = `
 .estamper__panel-title{font-weight:700;margin:0 0 8px}
 .estamper__actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .estamper__action{border:1px solid #374151;border-radius:999px;background:#1f2937;color:inherit;padding:5px 8px;text-decoration:none;cursor:pointer;font:inherit}
-.estamper[data-open="true"] .estamper__panel{display:block}
+.estamper[data-open="true"] .estamper__panel{display:block;animation:estamper-fade-in .18s ease}
 .estamper__close{float:right;margin-left:8px}
 `;
 
@@ -58,6 +63,31 @@ function appendLine(target: Element, name: string, value: unknown): void {
   target.append(`${name}: ${String(value)}\n`);
 }
 
+/** Programmatically open the Estamper details panel.
+ *
+ *  Looks up the panel by `rootId` (default `'estamper-root'`) and sets
+ *  `data-open="true"` on it, exactly as clicking the badge does.
+ *  Call this from menu items, footer buttons, keyboard shortcuts, etc.
+ *
+ *  @param rootId - The id of the mounted root element (matches `MountEstamperOptions.rootId`).
+ *  @param doc    - Defaults to `globalThis.document`.
+ *  @returns `true` if the element was found and toggled, `false` otherwise.
+ */
+export function openEstamperDetails(rootId = 'estamper-root', doc: Document = globalThis.document): boolean {
+  const root = doc?.getElementById(rootId);
+  if (!root) return false;
+  root.dataset.open = 'true';
+  return true;
+}
+
+/** Programmatically close the Estamper details panel. */
+export function closeEstamperDetails(rootId = 'estamper-root', doc: Document = globalThis.document): boolean {
+  const root = doc?.getElementById(rootId);
+  if (!root) return false;
+  root.dataset.open = 'false';
+  return true;
+}
+
 export function mountEstamper(options: MountEstamperOptions): HTMLElement {
   if (!options.stamp || options.stamp.length > 512) {
     throw new Error('Estamper requires a non-empty stamp up to 512 characters.');
@@ -69,7 +99,13 @@ export function mountEstamper(options: MountEstamperOptions): HTMLElement {
   const doc = target.ownerDocument;
   ensureStyle(doc);
 
+  // Deduplication: remove any existing widget with the same id before mounting.
+  const rootId = options.rootId ?? 'estamper-root';
+  const existing = doc.getElementById(rootId);
+  if (existing) existing.remove();
+
   const root = doc.createElement('div');
+  root.id = rootId;
   root.className = 'estamper';
   root.dataset.position = options.position ?? 'bottom-right';
   root.dataset.theme = options.theme ?? 'dark';
@@ -91,12 +127,9 @@ export function mountEstamper(options: MountEstamperOptions): HTMLElement {
   const title = doc.createElement('p');
   title.className = 'estamper__panel-title';
   title.textContent = 'Estamper build';
-  details.append(title, `Stamp:
-${options.stamp}
-
-`);
+  details.append(title, `Stamp:\n${options.stamp}\n\n`);
   appendLine(details, 'Environment', label(data.env, { prd: 'production', pre: 'preview', dev: 'development', stg: 'staging' }));
-  appendLine(details, 'Platform', label(data.cloud, { ghp: 'GitHub Pages', vcl: 'Vercel', ntl: 'Netlify', loc: 'local' }));
+  appendLine(details, 'Platform', label(data.cloud, { ghp: 'GitHub Pages', vcl: 'Vercel', ntl: 'Netlify', fb: 'Firebase', loc: 'local' }));
   appendLine(details, 'Commit', data.commit);
   appendLine(details, 'Branch', data.branch);
   appendLine(details, 'Actor', data.user);
