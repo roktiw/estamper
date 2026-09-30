@@ -190,10 +190,7 @@ https://estamper.dev/estamper.json
 
 Estamper does not execute code from config, does not send data externally, limits config sizes and stamp length, and avoids unsafe DOM rendering for user-controlled strings.
 
-## Relation to Debugog
+## License
 
-Estamper can be passed into tools such as Debugog:
+MIT © [Wiktor Świątkowski](https://github.com/roktiw)
 
-```js
-new Debugog({ build: estamper.stamp });
-```

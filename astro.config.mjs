@@ -8,7 +8,7 @@ export default defineConfig({
     starlight({
       title: 'estamper',
       description: 'Know exactly which deploy is on screen.',
-      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/roktiw/estamper-priv' }],
+      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/roktiw/estamper' }],
       sidebar: [
         {
           label: '📖 Getting Started',

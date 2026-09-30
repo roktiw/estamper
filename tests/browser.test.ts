@@ -20,7 +20,7 @@ describe('browser badge', () => {
       stamp: 'prd-ghp-🏷️-✅-silver-river-2026-06-28-14:02-roktiw@a1b2c3d',
       target: dom.window.document.body,
       details: { env: 'prd', cloud: 'ghp', commit: 'a1b2c3d', branch: 'main', user: 'roktiw', date: '2026-06-28', time: '14:02', dirty: false },
-      commitUrl: 'https://github.com/roktiw/estamper-priv/commit/a1b2c3d',
+      commitUrl: 'https://github.com/roktiw/estamper/commit/a1b2c3d',
       jsonUrl: '/estamper.json',
     });
     expect(root.querySelector('.estamper__badge')).toBeTruthy();

@@ -4,6 +4,15 @@
   "description": "Human-readable build stamps for web apps, staging, QA and screenshots.",
   "type": "module",
   "license": "MIT",
+  "author": "Wiktor Świątkowski",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/roktiw/estamper.git"
+  },
+  "homepage": "https://github.com/roktiw/estamper#readme",
+  "bugs": {
+    "url": "https://github.com/roktiw/estamper/issues"
+  },
   "bin": {
     "estamper": "./dist/cli/index.js"
   },

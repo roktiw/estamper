@@ -30,10 +30,10 @@ jobs:
           cache: npm
 
       - run: npm ci
+      - run: npm run build
 
       - name: Generate Estamper stamp
         run: npx estamper generate --config estamper.config.yml --out public/estamper.json
-        continue-on-error: true
 
       - run: npm run check
       - run: npm test
