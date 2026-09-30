@@ -1,0 +1,7 @@
+{
+  "hosting": {
+    "site": "estamper",
+    "public": "site-dist",
+    "cleanUrls": true
+  }
+}
