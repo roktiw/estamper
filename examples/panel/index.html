@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Estamper Config Panel</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 900px; margin: 32px auto; padding: 0 16px; }
+      label { display: block; margin: 12px 0; }
+      input, select, textarea { width: 100%; box-sizing: border-box; }
+      textarea { min-height: 90px; }
+      pre { background: #111827; color: #f8fafc; padding: 16px; overflow: auto; }
+      button { margin-right: 8px; }
+    </style>
+  </head>
+  <body>
+    <h1>Estamper Config Panel</h1>
+    <label>Mode <select id="mode"><option>emoji</option><option>ascii</option><option>auto</option></select></label>
+    <label>Format <input id="format" value="{emoji1}-{emoji2}-{word1}-{word2}-{date}-{user}@{commit}"></label>
+    <label>Words <textarea id="words">silver
+river
+melon
+orbit
+pixel
+debug
+rocket
+garden</textarea></label>
+    <label>Emojis <textarea id="emojis">🍉
+🛠️
+🚀
+🐶
+🍏
+🍌</textarea></label>
+    <label>ASCII <textarea id="ascii">WM
+TL
+RX
+DG
+PX
+QA</textarea></label>
+    <label>Position <select id="position"><option>bottom-right</option><option>bottom-left</option><option>top-right</option><option>top-left</option></select></label>
+    <label>Theme <select id="theme"><option>dark</option><option>light</option></select></label>
+    <h2>Preview</h2>
+    <pre id="preview"></pre>
+    <button id="copyYaml">Copy YAML</button>
+    <button id="downloadYaml">Download YAML</button>
+    <button id="copyJson">Copy JSON</button>
+    <button id="regenerate">Regenerate</button>
+    <h2>YAML</h2>
+    <pre id="yaml"></pre>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const list = (id) => $(id).value.split(/\n+/).map((v) => v.trim()).filter(Boolean);
+      let seed = 1;
+      const pick = (items) => items[seed++ % items.length] || '';
+      const config = () => ({
+        name: 'estamper',
+        mode: $('mode').value,
+        format: $('format').value,
+        words: { allow: list('words') },
+        emojis: { allow: list('emojis') },
+        ascii: { allow: list('ascii') },
+        badge: { position: $('position').value, theme: $('theme').value },
+      });
+      const yaml = (value) => [
+        `name: ${value.name}`,
+        `mode: ${value.mode}`,
+        `format: "${value.format}"`,
+        'words:',
+        '  allow:',
+        ...value.words.allow.map((word) => `    - ${word}`),
+        'emojis:',
+        '  allow:',
+        ...value.emojis.allow.map((emoji) => `    - ${emoji}`),
+        'ascii:',
+        '  allow:',
+        ...value.ascii.allow.map((item) => `    - ${item}`),
+        'badge:',
+        `  position: ${value.badge.position}`,
+        `  theme: ${value.badge.theme}`,
+      ].join('\n');
+      const render = () => {
+        const c = config();
+        const parts = {
+          emoji1: pick(c.emojis.allow), emoji2: pick(c.emojis.allow),
+          ascii1: pick(c.ascii.allow), ascii2: pick(c.ascii.allow),
+          word1: pick(c.words.allow), word2: pick(c.words.allow),
+          date: '2026-06-28-04:12:09', user: 'roktiw', commit: 'a1b2c3d',
+        };
+        const format = c.mode === 'ascii' ? c.format.replaceAll('emoji', 'ascii') : c.format;
+        $('preview').textContent = format.replace(/\{(\w+)\}/g, (_, key) => parts[key] || '');
+        $('yaml').textContent = yaml(c);
+      };
+      document.querySelectorAll('input,select,textarea').forEach((node) => node.addEventListener('input', render));
+      $('regenerate').addEventListener('click', () => { seed += 1; render(); });
+      $('copyYaml').addEventListener('click', () => navigator.clipboard.writeText($('yaml').textContent));
+      $('copyJson').addEventListener('click', () => navigator.clipboard.writeText(JSON.stringify(config(), null, 2)));
+      $('downloadYaml').addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(new Blob([$('yaml').textContent], { type: 'text/yaml' }));
+        link.download = 'estamper.config.yml';
+        link.click();
+      });
+      render();
+    </script>
+  </body>
+</html>

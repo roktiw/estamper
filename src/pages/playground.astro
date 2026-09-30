@@ -1,0 +1,78 @@
+---
+import '../styles/site.css';
+import { buildPlaygroundJson, buildPlaygroundSnippet, buildPlaygroundStamp, buildPlaygroundYaml, defaultPlaygroundConfig } from '../site/playground.js';
+const initialStamp = buildPlaygroundStamp(defaultPlaygroundConfig);
+const initialYaml = buildPlaygroundYaml(defaultPlaygroundConfig);
+const initialJson = buildPlaygroundJson(defaultPlaygroundConfig);
+const initialSnippet = buildPlaygroundSnippet(defaultPlaygroundConfig);
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Estamper playground</title>
+    <meta name="description" content="Interactive estamper config builder with live stamp, badge preview, YAML export, JSON export, and JS snippet export." />
+    <link rel="icon" href="/favicon.svg" />
+  </head>
+  <body>
+    <nav class="site-nav"><div class="container"><a class="logo" href="/">🍉 Estamper</a><div class="nav-links"><a href="/docs/">Docs</a><a href="/examples/">Examples</a><a href="/changelog/">Changelog</a></div></div></nav>
+    <main class="container section">
+      <p class="eyebrow">Estamper playground</p>
+      <h1 style="font-size:clamp(2.8rem,7vw,5rem)">Interactive config builder</h1>
+      <p class="lede" style="margin-left:0">Tune tokens, words, dates, optional segments, and presets. Preview the stamp and export YAML, JSON, or a browser snippet.</p>
+      <div class="playground" data-playground>
+        <section class="playground-panel">
+          <h2 style="font-size:1.6rem">Config panel</h2>
+          <div class="field-grid">
+            <label>ENV <select data-field="env"><option>stg</option><option>dev</option><option>prd</option><option>ci</option></select></label>
+            <label>CLOUD <select data-field="cloud"><option>az</option><option>aws</option><option>gcp</option><option>vercel</option><option>netlify</option><option>gha</option></select></label>
+            <label>MODE <select data-field="mode"><option value="emoji">emoji</option><option value="ascii">ascii</option><option value="auto">auto</option></select></label>
+            <label>PRESET <select data-field="preset"><option>standard</option><option>minimal</option><option>verbose</option><option>games</option><option>ascii</option><option>ci</option><option>custom</option></select></label>
+            <label>TOKEN COUNT <input data-field="tokenCount" type="number" min="0" max="4" value={defaultPlaygroundConfig.tokenCount} /></label>
+            <label>WORD COUNT <input data-field="wordCount" type="number" min="0" max="4" value={defaultPlaygroundConfig.wordCount} /></label>
+            <label>ASCII LENGTH <select data-field="asciiLength"><option value="2">2</option><option value="3">3</option></select></label>
+            <label>COMMIT LENGTH <input data-field="commitLength" type="number" min="4" max="12" value={defaultPlaygroundConfig.commitLength} /></label>
+            <label>DATE <input data-field="date" type="date" value={defaultPlaygroundConfig.date} /></label>
+            <label>TIME <input data-field="time" type="time" value={defaultPlaygroundConfig.time} /></label>
+            <label>USER <input data-field="user" value={defaultPlaygroundConfig.user} /></label>
+            <label>COMMIT <input data-field="commit" value={defaultPlaygroundConfig.commit} /></label>
+            <label>BADGE POSITION <select data-field="badgePosition"><option>bottom-right</option><option>bottom-left</option><option>top-right</option><option>top-left</option></select></label>
+            <label>THEME <select data-field="theme"><option>auto</option><option>light</option><option>dark</option></select></label>
+          </div>
+          <div class="field-grid" style="margin:1rem 0">
+            <label><input data-field="dirty" type="checkbox" /> DIRTY enabled</label>
+            <label><input data-field="branch" type="checkbox" /> BRANCH enabled</label>
+            <label><input data-field="build" type="checkbox" /> BUILD# enabled</label>
+          </div>
+          <label>WORDS LIST<textarea data-field="words">{defaultPlaygroundConfig.words.join('\n')}</textarea></label>
+          <label style="margin-top:1rem">EMOJI LIST<textarea data-field="emojis">{defaultPlaygroundConfig.emojis.join('\n')}</textarea></label>
+          <label style="margin-top:1rem">ASCII LIST<textarea data-field="ascii">{defaultPlaygroundConfig.ascii.join('\n')}</textarea></label>
+        </section>
+        <section class="playground-panel">
+          <h2 style="font-size:1.6rem">Preview</h2>
+          <p>Live stamp:</p>
+          <div class="stamp-card" style="margin:0 0 1rem"><code class="stamp-output" data-output="stamp">{initialStamp}</code></div>
+          <div class="button-row" style="justify-content:flex-start"><button class="button primary" type="button" data-action="copy-stamp">Copy stamp</button><button class="button" type="button" data-action="regenerate">Regenerate</button></div>
+          <hr style="border-color:var(--estamper-border); margin:1.5rem 0" />
+          <p>Panel preview:</p>
+          <div class="badge-mockup"><strong>App mockup</strong><p>QA sees this badge in screenshots.</p><div class="badge" data-output="badge">{initialStamp}</div></div>
+          <hr style="border-color:var(--estamper-border); margin:1.5rem 0" />
+          <h3>Export</h3>
+          <div class="button-row" style="justify-content:flex-start"><button class="button" type="button" data-action="download-yaml">Download YAML</button><button class="button" type="button" data-action="copy-yaml">Copy YAML</button><button class="button" type="button" data-action="copy-json">Copy JSON</button><button class="button" type="button" data-action="copy-snippet">Copy JS snippet</button></div>
+          <h3>Generated YAML:</h3>
+          <pre class="code-card" data-output="yaml">{initialYaml}</pre>
+          <template data-output="json">{initialJson}</template>
+          <template data-output="snippet">{initialSnippet}</template>
+        </section>
+      </div>
+    </main>
+    <footer class="site-footer"><div class="container"><strong>estamper.dev</strong><span>MIT License · made by roktiw</span></div></footer>
+    <script define:vars={{ playgroundDefaults: defaultPlaygroundConfig }}>
+      window.estamperPlaygroundDefaults = playgroundDefaults;
+    </script>
+    <script type="module">
+      import { mountPlayground } from '../site/playgroundClient.js';
+      mountPlayground(window.estamperPlaygroundDefaults);
+    </script>
+  </body>
+</html>

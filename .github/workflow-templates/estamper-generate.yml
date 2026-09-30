@@ -1,0 +1,26 @@
+name: Generate Estamper Build Stamp
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  estamper:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Generate Estamper stamp
+        run: npx estamper generate --config estamper.config.yml --out public/estamper.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: estamper
+          path: public/estamper.json

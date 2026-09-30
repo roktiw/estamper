@@ -1,0 +1,7 @@
+integrations:
+  - Astro
+  - Vite
+  - GitHub Actions
+  - Vercel
+  - Netlify
+  - Azure Static Web Apps
