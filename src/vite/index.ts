@@ -3,14 +3,22 @@ import { dirname } from 'node:path';
 import { loadConfig } from '../config/loadConfig.js';
 import { resolveStampOptions } from '../config/resolveStampOptions.js';
 import { generateStamp } from '../core/generateStamp.js';
+import type { StampResult } from '../core/types.js';
 import { getGitInfo } from '../git/getGitInfo.js';
 
 export interface EstamperVitePluginOptions {
   config?: string;
+  /** Write `estamper.json` to this path at build start (legacy approach).
+   *  When omitted the file is also emitted as a Rollup asset so it appears
+   *  in the manifest and is correctly placed in the output directory. */
   out?: string;
+  /** Inject `window.__ESTAMPER__` (full StampResult) into the HTML. */
   inject?: boolean;
   globalName?: string;
+  /** Inject `<meta name="estamper" content="...">` into the HTML. */
   meta?: boolean;
+  /** Emit estamper.json as a Rollup asset (recommended). Defaults to `true`. */
+  emitAsset?: boolean;
 }
 
 function escapeHtmlAttribute(value: string): string {
@@ -32,27 +40,51 @@ function assertGlobalName(value: string): void {
 }
 
 export function estamperVitePlugin(options: EstamperVitePluginOptions = {}) {
-  let stamp = '';
+  let result: StampResult | undefined;
+  const emitAsset = options.emitAsset !== false; // default true
+
   return {
     name: 'estamper',
     async buildStart() {
       const config = await loadConfig(options.config);
       const git = getGitInfo(config.commit.length);
-      const result = generateStamp(resolveStampOptions(config, git));
-      stamp = result.stamp;
-      const out = options.out ?? config.output.json;
-      await mkdir(dirname(out), { recursive: true });
-      await writeFile(out, `${JSON.stringify(result, null, 2)}\n`, 'utf8');
+      result = generateStamp(resolveStampOptions(config, git));
+
+      // Legacy: also write to a fixed path when `out` is specified.
+      if (options.out) {
+        const out = options.out ?? config.output.json;
+        await mkdir(dirname(out), { recursive: true });
+        await writeFile(out, `${JSON.stringify(result, null, 2)}\n`, 'utf8');
+      }
+    },
+    generateBundle() {
+      // Emit as a proper Rollup/Vite asset so it lands in the output dir
+      // and appears in the build manifest.
+      if (emitAsset && result) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (this as any).emitFile({
+          type: 'asset',
+          fileName: 'estamper.json',
+          source: `${JSON.stringify(result, null, 2)}\n`,
+        });
+      }
     },
     transformIndexHtml(html: string) {
-      let next = html;
-      if (options.meta) {
-        next = next.replace('</head>', `<meta name="estamper" content="${escapeHtmlAttribute(stamp)}">\n</head>`);
-      }
+      // Always validate globalName eagerly, even before the stamp is available.
       if (options.inject) {
         const globalName = options.globalName ?? '__ESTAMPER__';
         assertGlobalName(globalName);
-        next = next.replace('</head>', `<script>window.${globalName}=${safeJsonForScript({ stamp })}</script>\n</head>`);
+      }
+      if (!result) return html;
+      let next = html;
+      if (options.meta) {
+        next = next.replace('</head>', `<meta name="estamper" content="${escapeHtmlAttribute(result.stamp)}">\n</head>`);
+      }
+      if (options.inject) {
+        const globalName = options.globalName ?? '__ESTAMPER__';
+        // Inject the full StampResult (stamp + parts) so client-side widgets
+        // can display environment, cloud, commit, branch etc. without a fetch.
+        next = next.replace('</head>', `<script>window.${globalName}=${safeJsonForScript(result)}</script>\n</head>`);
       }
       return next;
     },

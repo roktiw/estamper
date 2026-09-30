@@ -1,6 +1,6 @@
 {
   "name": "estamper",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Human-readable build stamps for web apps, staging, QA and screenshots.",
   "type": "module",
   "license": "MIT",
@@ -17,20 +17,41 @@
     "estamper": "./dist/cli/index.js"
   },
   "exports": {
-    ".": "./dist/index.js",
-    "./browser": "./dist/browser/index.js",
-    "./vite": "./dist/vite/index.js",
-    "./config": "./dist/config/index.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist-cjs/index.js"
+    },
+    "./browser": {
+      "types": "./dist/browser/index.d.ts",
+      "import": "./dist/browser/index.js",
+      "require": "./dist-cjs/browser/index.js"
+    },
+    "./vite": {
+      "types": "./dist/vite/index.d.ts",
+      "import": "./dist/vite/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "import": "./dist/config/index.js",
+      "require": "./dist-cjs/config/index.js"
+    }
   },
+  "main": "./dist-cjs/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist",
+    "dist-cjs",
     "estamper.config.yml",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc -p tsconfig.cjs.json && node -e \"require('node:fs').writeFileSync('dist-cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
+    "build:esm": "tsc",
+    "build:cjs": "tsc -p tsconfig.cjs.json && node -e \"require('node:fs').writeFileSync('dist-cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
     "check": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
@@ -71,6 +92,7 @@
     "debug",
     "frontend",
     "web-games",
-    "release"
+    "release",
+    "firebase"
   ]
 }
