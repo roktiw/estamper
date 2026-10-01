@@ -1,3 +1,4 @@
+import { resolveSecurity } from '../security/policy.js';
 import type { StampogConfig } from './defaultConfig.js';
 import { validateFormat } from '../core/formatStamp.js';
 import { defaultEmojis, defaultWords } from '../core/defaults.js';
@@ -59,6 +60,7 @@ function validatePlaceholderCounts(config: StampogConfig): void {
 }
 
 export function validateConfig(config: StampogConfig): StampogConfig {
+  config.security = resolveSecurity(config.security);
   if (config.schemaVersion !== 1) {
     throw new Error('Invalid Estamper config: schemaVersion must be 1.');
   }

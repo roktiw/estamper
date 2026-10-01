@@ -1,0 +1,58 @@
+import YAML from 'yaml';
+import { defaultConfig, type StampogConfig } from './defaultConfig.js';
+import { validateConfig } from './schema.js';
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function mergeDeep(base: Record<string, unknown>, override: Record<string, unknown>): Record<string, unknown> {
+  const output: Record<string, unknown> = { ...base };
+  for (const [key, value] of Object.entries(override)) {
+    if (['__proto__', 'constructor', 'prototype'].includes(key)) throw new Error('Unsafe config key');
+    const current = output[key];
+    output[key] = isObject(current) && isObject(value) ? mergeDeep(current, value) : value;
+  }
+  return output;
+}
+
+function applyLegacyAliases(config: StampogConfig, parsed: Record<string, unknown>): StampogConfig {
+  const legacyEmojis = parsed.emojis;
+  if (isObject(legacyEmojis) && Array.isArray(legacyEmojis.allow)) {
+    config.tokens.emoji.allow = legacyEmojis.allow as string[];
+  }
+  const legacyAscii = parsed.ascii;
+  if (isObject(legacyAscii) && Array.isArray(legacyAscii.allow)) {
+    config.tokens.ascii.allow = legacyAscii.allow as string[];
+  }
+  const legacyGit = parsed.git;
+  if (isObject(legacyGit)) {
+    if (Number.isInteger(legacyGit.commitLength)) config.commit.length = legacyGit.commitLength as number;
+    if (typeof legacyGit.includeBranch === 'boolean') config.branch.enabled = legacyGit.includeBranch;
+    if (typeof legacyGit.includeDirty === 'boolean') config.commit.includeDirty = legacyGit.includeDirty;
+  }
+  if (parsed.mode === 'ascii') config.tokens.mode = 'ascii';
+  return config;
+}
+
+export function parseConfig(source: string, format: 'yaml' | 'json' = 'yaml'): StampogConfig {
+  if (new TextEncoder().encode(source).length > 131072) throw new Error('Config exceeds 128 KiB');
+  const parsed: unknown = format === 'json' ? JSON.parse(source) : YAML.parse(source, { maxAliasCount: 0 });
+  return normalizeConfig(parsed);
+}
+export function normalizeConfig(parsed: unknown): StampogConfig {
+  if (!isObject(parsed)) {
+    throw new Error('Invalid Estamper config: root value must be an object.');
+  }
+
+  function inspect(value: unknown, depth = 0): void {
+    if (depth > 24) throw new Error('Config nesting exceeds 24 levels');
+    if (value && typeof value === 'object') for (const [key, child] of Object.entries(value)) {
+      if (/password|secret|credential|privatekey/i.test(key)) throw new Error('Config must not contain secrets');
+      if (['__proto__', 'constructor', 'prototype'].includes(key)) throw new Error('Unsafe config key');
+      inspect(child, depth + 1);
+    }
+  }
+  inspect(parsed);
+  const merged = mergeDeep(structuredClone(defaultConfig) as unknown as Record<string, unknown>, parsed) as unknown as StampogConfig;
+  return validateConfig(applyLegacyAliases(merged, parsed));
+}

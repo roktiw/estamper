@@ -17,26 +17,30 @@ describe('browser badge', () => {
   it('mounts the Estamper build panel', () => {
     const dom = new JSDOM('<!doctype html><html><head></head><body></body></html>');
     const root = mountEstamper({
+      security: { access: 'min', disclosure: 'min' },
       stamp: 'prd-ghp-🏷️-✅-silver-river-2026-06-28-14:02-roktiw@a1b2c3d',
       target: dom.window.document.body,
       details: { env: 'prd', cloud: 'ghp', commit: 'a1b2c3d', branch: 'main', user: 'roktiw', date: '2026-06-28', time: '14:02', dirty: false },
       commitUrl: 'https://github.com/roktiw/estamper/commit/a1b2c3d',
       jsonUrl: '/estamper.json',
     });
+    openEstamperDetails('estamper-root', dom.window.document);
     expect(root.querySelector('.estamper__badge')).toBeTruthy();
-    expect(root.querySelector('.estamper__panel')?.textContent).toContain('Estamper build');
+    expect(root.querySelector('.estamper__panel')?.textContent).toContain('Stamp:');
     expect(root.querySelector('.estamper__panel')?.textContent).toContain('GitHub Pages');
-    expect(root.querySelector<HTMLAnchorElement>('a[href="/estamper.json"]')?.textContent).toBe('View JSON');
+    expect(root.querySelector('a')).toBeNull();
   });
 
   it('shows Firebase as platform label for cloud=fb', () => {
     const dom = new JSDOM('<!doctype html><html><head></head><body></body></html>');
     const root = mountEstamper({
+      security: { access: 'min', disclosure: 'min' },
       stamp: 'stg-fb-🚀-🧪-ocean-spark-2026-09-30-12:00-roktiw@abc1234',
       target: dom.window.document.body,
       details: { env: 'stg', cloud: 'fb' },
       rootId: 'estamper-fb-test',
     });
+    openEstamperDetails('estamper-fb-test', dom.window.document);
     expect(root.querySelector('.estamper__panel')?.textContent).toContain('Firebase');
   });
 
@@ -95,5 +99,25 @@ describe('browser badge', () => {
     const dom = new JSDOM('<!doctype html><html><head></head><body></body></html>');
     const result = openEstamperDetails('nonexistent', dom.window.document);
     expect(result).toBe(false);
+  });
+});
+
+describe('protected panel', () => {
+  it('rejects pretending plaintext options are protected', () => {
+    const dom = new JSDOM('<body></body>');
+    expect(() => mountEstamper({ stamp:'build-id', details:{ user:'private' }, target:dom.window.document.body })).toThrow('must not be embedded');
+  });
+  it('requires authorization on every open and discards late results after close', async () => {
+    const dom = new JSDOM('<body></body>'); let calls = 0; let complete!: (value: any) => void;
+    const root = mountEstamper({ stamp:'build-id', target:dom.window.document.body, security:{ access:'max' }, loadAuthorizedReport: () => { calls++; return new Promise(resolve => { complete = resolve; }); } });
+    openEstamperDetails(undefined, dom.window.document); await Promise.resolve();
+    closeEstamperDetails(undefined, dom.window.document);
+    complete({ stamp:'private-report', parts:{ mode:'emoji', user:'private' } }); await new Promise(resolve => setTimeout(resolve, 0));
+    expect(root.textContent).not.toContain('private-report');
+    openEstamperDetails(undefined, dom.window.document); await Promise.resolve(); expect(calls).toBe(2);
+  });
+  it('programmatic open does not bypass default protection', () => {
+    const dom = new JSDOM('<body></body>'); const root = mountEstamper({ stamp:'build-id', target:dom.window.document.body });
+    openEstamperDetails(undefined, dom.window.document); expect(root.textContent).toContain('not configured'); expect(root.querySelector('.estamper__report')).toBeNull();
   });
 });

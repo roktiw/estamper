@@ -6,6 +6,7 @@ export interface GitInfo {
   branch?: string;
   user: string;
   dirty: boolean;
+  available?: boolean;
 }
 
 function git(args: string[]): string | undefined {
@@ -21,11 +22,12 @@ export function getGitInfo(commitLength = 7): GitInfo {
   const commit = (gha.commit ?? git(['rev-parse', 'HEAD']) ?? '0000000').slice(0, commitLength);
   const branch = gha.branch ?? git(['rev-parse', '--abbrev-ref', 'HEAD']);
   const user = gha.user ?? git(['config', 'user.name']) ?? 'anonymous';
-  const status = git(['status', '--porcelain']) ?? '';
+  const status = git(['status', '--porcelain']);
   return {
     commit,
     branch: branch === 'HEAD' ? undefined : branch,
     user,
-    dirty: status.length > 0,
+    dirty: Boolean(status?.length),
+    available: status !== undefined,
   };
 }

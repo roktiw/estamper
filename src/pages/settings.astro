@@ -1,0 +1,25 @@
+---
+import '../styles/site.css';
+import { securityChoices } from '../security/policy.js';
+---
+<html lang="en">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Estamper settings</title></head>
+<body>
+<nav class="site-nav"><div class="container"><a class="logo" href="/">Estamper</a><a href="/docs/">Documentation</a></div></nav>
+<main class="container section" data-settings>
+<p class="eyebrow">Configuration · local to this tab</p><h1>Estamper settings</h1>
+<p class="lede">Choose each security control independently. Import, edit and download the same validated configuration as YAML or JSON. Passwords belong in your build secret store.</p>
+<div class="button-row" style="justify-content:flex-start">{['min','mid','max'].map((level, i) => <button class="button" data-preset={level}>{['Min · YOLO / public demo','Mid · protected default','Max · backend / enterprise'][i]}</button>)}</div>
+<div class="playground">
+<section class="playground-panel"><h2>Security controls</h2>
+{Object.entries(securityChoices).map(([key, choices]) => <label style="display:block;margin-bottom:1rem">{key}<select data-security={key}>{choices.map((text, i) => <option value={['min','mid','max'][i]} selected={i===1}>{['Min','Mid','Max'][i]} — {text}</option>)}</select></label>)}
+<p>All production builds block automatic JSON publication. Min is an explicit choice to expose details. Max needs a server that checks identity and authorization on every request; it is not a certification.</p>
+<h2>Complete configuration</h2><p>Edit all appearance, token and build options below, then apply. Invalid input leaves the last valid configuration unchanged.</p>
+<label>YAML or JSON<textarea data-config spellcheck="false" rows="18" style="width:100%;font-family:monospace"></textarea></label>
+<div class="button-row"><button class="button" data-action="apply">Apply editor</button><button class="button" data-action="reset">Reset defaults</button></div>
+<label>Import config<input type="file" accept=".yaml,.yml,.json" data-import/></label></section>
+<section class="playground-panel"><h2>Effective policy</h2><pre data-policy class="code-card"></pre><p>Chip preview uses synthetic data. Demo password: <code>estamper-demo-only</code>. Production details remain locked until the password is entered; closing locks them again.</p><div data-preview></div>
+<h2>Download settings</h2><div class="button-row"><button class="button" data-export="yaml">Download YAML</button><button class="button" data-export="json">Download JSON</button></div><p>These files contain settings only, never a password or a production report.</p><p role="status" data-status></p>
+</section></div></main>
+<script>import { mountSettings } from '../site/settings.js'; mountSettings();</script>
+</body></html>

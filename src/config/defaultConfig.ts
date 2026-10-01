@@ -1,3 +1,4 @@
+import { defaultSecurity, type SecurityPolicy } from '../security/policy.js';
 import {
   defaultAscii,
   defaultEmojis,
@@ -10,6 +11,7 @@ import type { PresetName, StampogMode, WordCase } from '../core/types.js';
 import type { TokenMapping, WordAlias } from '../core/defaults.js';
 
 export interface EstamperConfig {
+  security: SecurityPolicy;
   schemaVersion: 1;
   name: string;
   mode: StampogMode;
@@ -140,6 +142,7 @@ export interface EstamperConfig {
 export type StampogConfig = EstamperConfig;
 
 export const defaultConfig: StampogConfig = {
+  security: { ...defaultSecurity },
   schemaVersion: 1,
   name: 'estamper',
   mode: 'auto',
@@ -245,14 +248,5 @@ export const defaultConfig: StampogConfig = {
     requireGit: false,
     requireCommit: false,
     allowUnsafeChars: false,
-  },
-  emojis: { allow: defaultEmojis },
-  ascii: { allow: defaultAscii },
-  git: {
-    commitLength: 7,
-    includeBranch: false,
-    includeDirty: true,
-    usernameSource: 'github',
-    fallbackUsernameSource: 'git-config',
   },
 };

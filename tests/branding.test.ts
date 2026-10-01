@@ -16,12 +16,12 @@ describe('Estamper branding', () => {
     expect(packageJson.keywords).toEqual(expect.arrayContaining(['build', 'vite', 'qa', 'web-games']));
   });
 
-  it('opens the README with the visible build stamp pitch', async () => {
+  it('documents the protected default and separate release destinations', async () => {
     const readme = await readFile('README.md', 'utf8');
 
     expect(readme).toContain('# Estamper');
-    expect(readme).toContain('Tiny visible build stamps for web apps and games.');
-    expect(readme).toContain('When QA sends a screenshot');
-    expect(readme).toContain('stg-az-🍉-🛠️-silver-river-2026-06-28-04:12-roktiw@a1b2c3d');
+    expect(readme).toContain('password-encrypted details');
+    expect(readme).toContain('No automatic `estamper.json`');
+    expect(readme).toContain('A GitHub Release is separate from npm publication');
   });
 });

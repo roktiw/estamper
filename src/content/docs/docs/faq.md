@@ -13,7 +13,7 @@ Use `mode: auto` when possible. Emoji stamps are memorable in screenshots; ASCII
 
 ## Where should the generated file live?
 
-For browser apps, write `public/estamper.json` during CI before the app build.
+For browser apps, write `public/estamper.js` during CI before the app build.
 
 ## Can I hide the badge in production?
 

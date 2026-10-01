@@ -1,42 +1,16 @@
 ---
 title: Browser Badge
-description: Mount a visible Estamper badge in the browser.
+description: Password-protected build diagnostics.
 ---
 
 ```js
 import { mountEstamper } from 'estamper/browser';
-
-mountEstamper({
-  stamp,
-  details,
-  position: 'bottom-right',
-  theme: 'auto',
-});
+import payload from './estamper.js';
+mountEstamper({ stamp: payload.stamp, payload, position: 'bottom-right' });
 ```
 
-The badge renders text safely, supports copy-on-click, and can expose a details panel for QA workflows.
+Click the chip, enter the password, then read or export the report. Close or Escape locks it again. Programmatic opening follows the same authentication flow. Plaintext details are rejected with protected access; passing a password or a password hash to the browser is not supported.
 
-## DOM
+Default exports include TXT. Set `security.exports: min` for an unlocked JSON download, or `max` to hide export controls. Rendering always uses text nodes. This does not prevent an authorized reader from copying text.
 
-The browser entry mounts a fixed badge element into `document.body`. The visible text is set with safe text content, not HTML.
-
-## CSS classes
-
-Use badge classes to customize placement, theme, and typography while keeping the stamp visible in screenshots:
-
-- `.estamper-badge`
-- `.estamper-badge--bottom-right`
-- `.estamper-badge--bottom-left`
-- `.estamper-badge--top-right`
-- `.estamper-badge--top-left`
-
-## API
-
-```js
-mountEstamper({
-  stamp,
-  details,
-  position: 'bottom-right',
-  theme: 'auto',
-});
-```
+For backend access set `security.access: max` and provide `loadAuthorizedReport`, an asynchronous function that fetches a report from your authenticated server on every open. The server must enforce authorization and disclosure. Missing configuration fails closed. See the package README and SECURITY.md for the full contract.

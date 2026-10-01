@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0 — 2026-10-01 — Protected diagnostics and public settings
+
+- Add `/settings/` with independent min/mid/max controls for access, disclosure, exports and release checks, complete config editing, YAML/JSON import/export and a synthetic password demo. Playground exports the same validated schema.
+- Default access now requires a build-time secret and AES-256-GCM encrypted report. PBKDF2-SHA256 uses 600,000 iterations; random salt/nonce and authenticated policy prevent silent tampering. Closing locks again; no persistent credentials. Max access ships no report and requires the host's authorized backend on every open. No claim of enterprise certification or server-side Auth implementation.
+- Block production JSON output in CLI/Vite, remove tracked public diagnostics, check stale public assets and reject unsafe/oversized/aliased config. External Vite metadata script; clean compiler output prevents obsolete exporters entering the package. Update docs, workflows and provider header configuration.
+- DevSecOps: pinned action SHAs, read-only build permissions, isolated deployment permissions, no checkout credential persistence, audit and headed E2E. Dependency audit changed from 10 findings (including one critical) to zero. Node minimum is 22.12.
+- Local validation: 47 unit/integration tests including a real Vite build, TypeScript, clean ESM/CJS build, Astro build/artifact guard, dependency audit and 3 headed Chromium scenarios PASS. Browser checks cover wrong/correct password, download identity, Escape/focus/re-lock, invalid config, import/export and widths 320/402/1440. Mobile screenshot inspected. No physical device or independent security audit.
+- Package validation: isolated installation of the 97-file tarball and ESM/CJS core/config/browser entrypoints PASS; obsolete raw exporter and public metadata absent. GitHub Actions did not execute tests: public CI annotation confirms an account billing lock; private CI reports startup_failure. Vercel preview succeeded; Netlify preview failed, and website acceptance is not claimed.
+- Merge: pending; work on `codex/public-security-settings`. Public GitHub release preparation is separate from private repository history. Release identities and publication results will be recorded in RELEASES.md after verification.
+- Deployment/npm: no manual website or Splitolo deployment in this package. npm login is unavailable and the registry currently returns 404 for this package; GitHub Release tarball is the publication target. Existing automatic website integrations are tracked separately.
+
+
 All notable changes to this project will be documented in this file.
 
 ## 0.2.0 — 2026-09-30

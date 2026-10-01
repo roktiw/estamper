@@ -7,20 +7,24 @@ on:
 
 jobs:
   estamper:
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          node-version: 20
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
       - run: npm ci
+      - run: npm audit --audit-level=moderate
       - name: Generate Estamper stamp
-        run: npx estamper generate --config estamper.config.yml --out public/estamper.json
+        run: npx --no-install estamper generate --config estamper.config.yml --js public/estamper.js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/upload-artifact@v4
+          ESTAMPER_PASSWORD: ${{ secrets.ESTAMPER_PASSWORD }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: estamper
-          path: public/estamper.json
+          path: public/estamper.js

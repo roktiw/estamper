@@ -1,4 +1,5 @@
 import YAML from 'yaml';
+import { normalizeConfig } from '../config/parseConfig.js';
 import { defaultAscii, defaultEmojis, defaultWords } from '../core/defaults.js';
 
 export type PlaygroundMode = 'emoji' | 'ascii' | 'auto';
@@ -98,13 +99,13 @@ export function buildPlaygroundStamp(config: PlaygroundConfig): string {
 }
 
 export function buildPlaygroundYaml(config: PlaygroundConfig): string {
-  return YAML.stringify({
+  return YAML.stringify(normalizeConfig({
     schemaVersion: 1,
     name: 'estamper',
     preset: config.preset,
-    format: '{env}-{cloud}-{token1}-{token2}-{word1}-{word2}-{date}-{time}-{user}@{commit}',
-    env: config.env,
-    cloud: config.cloud,
+    format: ['{env}', '{cloud}', ...Array.from({length: clampInteger(config.tokenCount,0,4)}, (_,i) => `{token${i+1}}`), ...Array.from({length: clampInteger(config.wordCount,0,4)}, (_,i) => `{word${i+1}}`), '{date}', '{time}', '{user}@{commit}'].join('-'),
+    env: { value: config.env },
+    cloud: { provider: config.cloud },
     mode: config.mode,
     tokens: {
       enabled: config.tokenCount > 0,
@@ -124,15 +125,15 @@ export function buildPlaygroundYaml(config: PlaygroundConfig): string {
       includeBranch: config.branch,
       includeDirty: config.dirty,
     },
-    build: { includeNumber: config.build },
+    buildNumber: { enabled: config.build },
     badge: { enabled: true, position: config.badgePosition, theme: config.theme, copyOnClick: true },
-  });
+  }));
 }
 
 export function buildPlaygroundJson(config: PlaygroundConfig): string {
-  return `${JSON.stringify({ stamp: buildPlaygroundStamp(config), config }, null, 2)}\n`;
+  return `${JSON.stringify(YAML.parse(buildPlaygroundYaml(config)), null, 2)}\n`;
 }
 
 export function buildPlaygroundSnippet(config: PlaygroundConfig): string {
-  return `import { mountEstamper } from 'estamper/browser';\n\nmountEstamper({\n  stamp: ${JSON.stringify(buildPlaygroundStamp(config))},\n  position: ${JSON.stringify(config.badgePosition)},\n  theme: ${JSON.stringify(config.theme)},\n});\n`;
+  return `import { mountEstamper } from 'estamper/browser';\nimport payload from './estamper.js';\n\nmountEstamper({\n  stamp: payload.stamp,\n  payload,\n  position: ${JSON.stringify(config.badgePosition)},\n  theme: ${JSON.stringify(config.theme)},\n});\n`;
 }

@@ -1,94 +1,77 @@
-import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import type { IncomingMessage, ServerResponse } from 'node:http';
+import { mkdir, writeFile, readdir } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { loadConfig } from '../config/loadConfig.js';
 import { resolveStampOptions } from '../config/resolveStampOptions.js';
 import { generateStamp } from '../core/generateStamp.js';
-import type { StampResult } from '../core/types.js';
 import { getGitInfo } from '../git/getGitInfo.js';
-
+import { buildPublicStamp, checkRelease } from '../security/build.js';
+import type { PublicStamp } from '../security/envelope.js';
 export interface EstamperVitePluginOptions {
   config?: string;
-  /** Write `estamper.json` to this path at build start (legacy approach).
-   *  When omitted the file is also emitted as a Rollup asset so it appears
-   *  in the manifest and is correctly placed in the output directory. */
+  /** Legacy JSON output is development-only, with explicit public access. */
   out?: string;
-  /** Inject `window.__ESTAMPER__` (full StampResult) into the HTML. */
   inject?: boolean;
   globalName?: string;
-  /** Inject `<meta name="estamper" content="...">` into the HTML. */
   meta?: boolean;
-  /** Emit estamper.json as a Rollup asset (recommended). Defaults to `true`. */
+  /** Default false. Development-only with explicit public access. */
   emitAsset?: boolean;
 }
-
-function escapeHtmlAttribute(value: string): string {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('"', '&quot;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;');
-}
-
-function safeJsonForScript(value: unknown): string {
-  return JSON.stringify(value).replaceAll('<', '\\u003c');
-}
-
 function assertGlobalName(value: string): void {
-  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(value)) {
-    throw new Error('Estamper Vite plugin globalName must be a valid JavaScript identifier.');
-  }
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(value) || ['__proto__', 'constructor', 'prototype'].includes(value)) throw new Error('Estamper Vite plugin globalName must be a safe JavaScript identifier');
 }
-
 export function estamperVitePlugin(options: EstamperVitePluginOptions = {}) {
-  let result: StampResult | undefined;
-  const emitAsset = options.emitAsset !== false; // default true
-
+  let result: PublicStamp | undefined;
+  let publicDir: string | false = false;
+  let base = '/';
+  let production = true; // build hooks used without Vite config fail closed
   return {
     name: 'estamper',
-    async buildStart() {
-      const config = await loadConfig(options.config);
-      const git = getGitInfo(config.commit.length);
-      result = generateStamp(resolveStampOptions(config, git));
-
-      // Legacy: also write to a fixed path when `out` is specified.
-      if (options.out) {
-        const out = options.out ?? config.output.json;
-        await mkdir(dirname(out), { recursive: true });
-        await writeFile(out, `${JSON.stringify(result, null, 2)}\n`, 'utf8');
-      }
+    configResolved(config: { command: string; publicDir?: string | false; base?: string }) { production = config.command === 'build'; publicDir = config.publicDir ?? false; base = config.base ?? '/'; },
+    configureServer(server: { middlewares: { use: (handler: (req: IncomingMessage, res: ServerResponse, next: () => void) => void) => void } }) {
+      server.middlewares.use((req, res, next) => {
+        if (!options.inject || req.url?.split('?')[0] !== `${base}assets/estamper.js`) return next();
+        assertGlobalName(options.globalName ?? '__ESTAMPER__');
+        res.setHeader('Content-Type', 'text/javascript'); res.setHeader('Cache-Control', 'no-store'); res.setHeader('X-Content-Type-Options', 'nosniff');
+        if (!result) { res.statusCode = 503; res.end('/* Estamper not ready */'); return; }
+        res.end(`window.${options.globalName ?? '__ESTAMPER__'}=${JSON.stringify(result).replaceAll('<', '\\u003c')};`);
+      });
     },
-    generateBundle() {
-      // Emit as a proper Rollup/Vite asset so it lands in the output dir
-      // and appears in the build manifest.
-      if (emitAsset && result) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (this as any).emitFile({
-          type: 'asset',
-          fileName: 'estamper.json',
-          source: `${JSON.stringify(result, null, 2)}\n`,
-        });
+    async buildStart() {
+      if (production && publicDir) {
+        async function inspect(dir: string): Promise<void> {
+          let entries;
+          try { entries = await readdir(dir, { withFileTypes: true }); }
+          catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return; throw error; }
+          for (const entry of entries) {
+            if (entry.isSymbolicLink()) throw new Error('Symlink in public directory requires review');
+            if (/^(estamper(?:\.config)?\.(json|ya?ml)|\.env(?:\..*)?)$/i.test(entry.name)) throw new Error('Remove stale public Estamper metadata/config before building');
+            if (entry.isDirectory()) await inspect(join(dir, entry.name));
+          }
+        }
+        await inspect(publicDir);
       }
+      const config = await loadConfig(options.config);
+      if ((options.out || options.emitAsset) && (production || config.security.access !== 'min')) throw new Error('Public JSON output is forbidden for builds and protected reports');
+      const git = getGitInfo(config.commit.length); checkRelease(config.security, git);
+      result = await buildPublicStamp(generateStamp(resolveStampOptions(config, git)), config.security);
+      if (options.out) { await mkdir(dirname(options.out), { recursive: true }); await writeFile(options.out, JSON.stringify(result)); }
+    },
+    generateBundle(this: { emitFile: (asset: { type: 'asset'; fileName: string; source: string }) => void }, _opts: unknown, bundle: Record<string, { fileName?: string }> = {}) {
+      for (const name of Object.keys(bundle)) {
+        if (/(^|\/)estamper(?:\.config)?\.(json|ya?ml)$/i.test(name)) throw new Error('Remove stale public Estamper metadata/config from the build');
+      }
+      if (options.emitAsset && result) this.emitFile({ type: 'asset', fileName: 'estamper.json', source: JSON.stringify(result) });
+      if (options.inject) assertGlobalName(options.globalName ?? '__ESTAMPER__');
+      if (options.inject && result) this.emitFile({ type: 'asset', fileName: 'assets/estamper.js', source: `window.${options.globalName ?? '__ESTAMPER__'}=${JSON.stringify(result).replaceAll('<', '\\u003c')};` });
     },
     transformIndexHtml(html: string) {
-      // Always validate globalName eagerly, even before the stamp is available.
-      if (options.inject) {
-        const globalName = options.globalName ?? '__ESTAMPER__';
-        assertGlobalName(globalName);
-      }
+      const globalName = options.globalName ?? '__ESTAMPER__'; assertGlobalName(globalName);
       if (!result) return html;
-      let next = html;
-      if (options.meta) {
-        next = next.replace('</head>', `<meta name="estamper" content="${escapeHtmlAttribute(result.stamp)}">\n</head>`);
-      }
-      if (options.inject) {
-        const globalName = options.globalName ?? '__ESTAMPER__';
-        // Inject the full StampResult (stamp + parts) so client-side widgets
-        // can display environment, cloud, commit, branch etc. without a fetch.
-        next = next.replace('</head>', `<script>window.${globalName}=${safeJsonForScript(result)}</script>\n</head>`);
-      }
-      return next;
+      if (options.meta) html = html.replace('</head>', `<meta name="estamper" content="${result.stamp.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;')}">\n</head>`);
+      if (options.inject) html = html.replace('</head>', `<script src="${base.replaceAll('&', '&amp;').replaceAll('\"', '&quot;').replaceAll('<', '&lt;')}assets/estamper.js"></script>\n</head>`);
+      return html;
     },
   };
 }
-
 export const estamperVite = estamperVitePlugin;
