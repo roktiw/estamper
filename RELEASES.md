@@ -8,3 +8,5 @@
 - Distribution: public GitHub Release tarball planned. npm publication has not occurred (no registry authentication).
 - Website: no manual deployment; automatic provider integrations may react to merges and must be verified separately. Splitolo production is outside this release.
 - Breaking defaults: password encryption, no raw production JSON, Node >=22.12. Existing explicit public widgets must select min access. Backend/max mode requires a host-provided authenticated service.
+
+- Additional evidence: 97-file package allowlist and clean-directory ESM/CJS install PASS. Public GitHub CI run 36840926048 could not start due to account billing lock (zero steps), not a test failure. Private CI startup_failure and Netlify preview failure are separate from the successful local checks.
