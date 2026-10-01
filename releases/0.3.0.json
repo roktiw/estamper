@@ -1,0 +1,31 @@
+{
+  "version": "0.3.0",
+  "publishedAt": "2026-10-01T09:12:49Z",
+  "sourceCommit": "45bf010bacebdf4e463c702d29a4e3fe17b37900",
+  "packagingSource": "9fa97144eef0f56affb4692118713ac2a968d0bf",
+  "sourceTreeEqual": true,
+  "tag": "v0.3.0",
+  "pullRequest": "https://github.com/roktiw/estamper/pull/1",
+  "releaseUrl": "https://github.com/roktiw/estamper/releases/tag/v0.3.0",
+  "artifact": {
+    "name": "estamper-0.3.0.tgz",
+    "bytes": 42386,
+    "files": 97,
+    "sha256": "fa01827548d4c37c96ac7a79610c15b667a0e229a81425f9e612733dabd610c1",
+    "anonymousDownloadVerified": true
+  },
+  "validation": {
+    "tests": 47,
+    "headedChromiumScenarios": 3,
+    "dependencyAdvisories": 0,
+    "typecheck": "PASS",
+    "esmCjs": "PASS",
+    "isolatedPackageInstall": "PASS",
+    "compiledCliEncryption": "PASS",
+    "siteArtifactGuard": "PASS"
+  },
+  "githubCI": "Not executed: account billing lock; run 36840926048 has zero steps",
+  "npmPublished": false,
+  "manualWebsiteDeploy": false,
+  "splitoloDeploy": false
+}
