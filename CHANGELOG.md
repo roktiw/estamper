@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-01 — 0.3.0 publicly released
+
+- Public PR #1 merged as `45bf010bacebdf4e463c702d29a4e3fe17b37900`, tag `v0.3.0`. [GitHub Release](https://github.com/roktiw/estamper/releases/tag/v0.3.0) published at 09:12:49 UTC with package and SHA256SUMS.txt. Anonymous download matches SHA-256; source merge tree matches the tested packaging tree. Full identifiers in RELEASES.md and releases/0.3.0.json.
+- Acceptance: 47 local tests, TypeScript, ESM/CJS, clean package install, compiled CLI encrypt/decrypt/raw-output rejection, artifact guard, zero dependency advisories and 3 headed browser scenarios PASS. Hosted CI did not run because the account is billing-locked; this remains separate from local PASS.
+- npm is not published (registry authentication unavailable). No manual website or Splitolo deploy. The existing Vercel integration reports successful production deployment, but its URL redirects unauthenticated requests to login, so public panel acceptance is not claimed. Netlify preview failed; no provider setup was changed to bypass these conditions.
+- This is a release-record update only; published package/tag are immutable. Shared-password offline guessing and the host-supplied backend/MFA/authorization requirements remain documented in SECURITY.md.
+
+
 ## 0.3.0 — 2026-10-01 — Protected diagnostics and public settings
 
 - Add `/settings/` with independent min/mid/max controls for access, disclosure, exports and release checks, complete config editing, YAML/JSON import/export and a synthetic password demo. Playground exports the same validated schema.
