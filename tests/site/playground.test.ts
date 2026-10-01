@@ -23,7 +23,7 @@ describe('website playground helpers', () => {
     expect(buildPlaygroundYaml(defaultPlaygroundConfig)).toContain('mode: emoji');
     expect(buildPlaygroundYaml(defaultPlaygroundConfig)).toContain('schemaVersion: 1');
     expect(buildPlaygroundYaml(defaultPlaygroundConfig)).toContain('position: bottom-right');
-    expect(buildPlaygroundJson(defaultPlaygroundConfig)).toContain('"stamp"');
+    expect(buildPlaygroundJson(defaultPlaygroundConfig)).toContain('"security"');
     expect(buildPlaygroundSnippet(defaultPlaygroundConfig)).toContain('mountEstamper');
   });
 

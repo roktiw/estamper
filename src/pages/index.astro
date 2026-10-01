@@ -14,7 +14,7 @@ const integrations = ['JS', 'TS', 'Python', '.NET', 'Ruby', 'Vite', 'Webpack', '
     <link rel="icon" href="/favicon.svg" />
   </head>
   <body>
-    <nav class="site-nav"><div class="container"><a class="logo" href="/">🍉 Estamper</a><div class="nav-links"><a href="/docs/">Docs</a><a href="/playground/">Playground</a><a href="/examples/">Examples</a><a href="/changelog/">Changelog</a><a href="https://github.com/roktiw/estamper">GitHub</a></div></div></nav>
+    <nav class="site-nav"><div class="container"><a class="logo" href="/">🍉 Estamper</a><div class="nav-links"><a href="/docs/">Docs</a><a href="/settings/">Settings</a><a href="/playground/">Playground</a><a href="/examples/">Examples</a><a href="/changelog/">Changelog</a><a href="https://github.com/roktiw/estamper">GitHub</a></div></div></nav>
     <main>
       <section class="hero container">
         <div class="eyebrow">Estamper logo</div>
@@ -59,9 +59,9 @@ roktiw@a1b2c3d</pre></div>
         <div class="card" style="text-align:center">
           <p class="eyebrow">Dogfooded by default</p>
           <h2>This website is stamped by Estamper.</h2>
-          <p>The production build generates <code>public/estamper.json</code> before Astro builds, then mounts the same copyable badge that Estamper users add to their apps.</p>
-          <pre>bunx estamper generate --config estamper.config.yml --out public/estamper.json</pre>
-          <button id="copy-site-stamp" class="button primary" type="button">Copy this site's stamp</button>
+          <p>Production publishes no Estamper JSON. Protected details are encrypted at build time or fetched from your authenticated backend.</p>
+          <pre>estamper generate --js dist/estamper.js</pre>
+          <a href="/settings/" class="button primary">Configure protection</a>
         </div>
       </section>
 

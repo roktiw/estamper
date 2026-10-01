@@ -1,10 +1,10 @@
 {
   "name": "estamper",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Human-readable build stamps for web apps, staging, QA and screenshots.",
   "type": "module",
   "license": "MIT",
-  "author": "Wiktor Świątkowski",
+  "author": "Wiktor \u015awi\u0105tkowski",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/roktiw/estamper.git"
@@ -46,10 +46,13 @@
     "estamper.config.yml",
     "README.md",
     "LICENSE",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "RELEASES.md",
+    "scripts/check-public-artifact.mjs"
   ],
   "scripts": {
-    "build": "tsc && tsc -p tsconfig.cjs.json && node -e \"require('node:fs').writeFileSync('dist-cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
+    "build": "node scripts/clean-build.mjs && tsc && tsc -p tsconfig.cjs.json && node -e \"require('node:fs').writeFileSync('dist-cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
     "build:esm": "tsc",
     "build:cjs": "tsc -p tsconfig.cjs.json && node -e \"require('node:fs').writeFileSync('dist-cjs/package.json', JSON.stringify({type:'commonjs'}))\"",
     "check": "tsc --noEmit",
@@ -58,9 +61,10 @@
     "typecheck": "tsc --noEmit",
     "prepack": "npm run build",
     "site:dev": "astro dev",
-    "site:build": "astro build",
+    "site:build": "astro build && node scripts/check-public-artifact.mjs site-dist",
     "site:preview": "astro preview",
-    "site:e2e:server": "npm run build && ESTAMPER_ENV=prd ESTAMPER_CLOUD=ghp node dist/cli/index.js generate --config estamper.config.yml --out public/estamper.json && npm run site:build && npm run site:preview -- --host 127.0.0.1 --port 4321"
+    "site:e2e:server": "npm run build && npm run site:build && node node_modules/astro/bin/astro.mjs preview --host 127.0.0.1 --port 4327 --ignore-lock",
+    "security:check": "npm audit --audit-level=moderate && npm run check && npm test"
   },
   "dependencies": {
     "yaml": "^2.8.0"
@@ -73,10 +77,10 @@
     "astro": "^7.0.3",
     "jsdom": "^25.0.1",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
+    "vitest": "4.1.11"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.12"
   },
   "keywords": [
     "build",

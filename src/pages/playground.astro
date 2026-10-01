@@ -15,7 +15,7 @@ const initialSnippet = buildPlaygroundSnippet(defaultPlaygroundConfig);
     <link rel="icon" href="/favicon.svg" />
   </head>
   <body>
-    <nav class="site-nav"><div class="container"><a class="logo" href="/">🍉 Estamper</a><div class="nav-links"><a href="/docs/">Docs</a><a href="/examples/">Examples</a><a href="/changelog/">Changelog</a></div></div></nav>
+    <nav class="site-nav"><div class="container"><a class="logo" href="/">🍉 Estamper</a><div class="nav-links"><a href="/settings/">Security settings</a><a href="/docs/">Docs</a><a href="/examples/">Examples</a><a href="/changelog/">Changelog</a></div></div></nav>
     <main class="container section">
       <p class="eyebrow">Estamper playground</p>
       <h1 style="font-size:clamp(2.8rem,7vw,5rem)">Interactive config builder</h1>
@@ -67,12 +67,10 @@ const initialSnippet = buildPlaygroundSnippet(defaultPlaygroundConfig);
       </div>
     </main>
     <footer class="site-footer"><div class="container"><strong>estamper.dev</strong><span>MIT License · made by roktiw</span></div></footer>
-    <script define:vars={{ playgroundDefaults: defaultPlaygroundConfig }}>
-      window.estamperPlaygroundDefaults = playgroundDefaults;
-    </script>
-    <script type="module">
+        <script>
+      import { defaultPlaygroundConfig } from '../site/playground.js';
       import { mountPlayground } from '../site/playgroundClient.js';
-      mountPlayground(window.estamperPlaygroundDefaults);
+      mountPlayground(defaultPlaygroundConfig);
     </script>
   </body>
 </html>

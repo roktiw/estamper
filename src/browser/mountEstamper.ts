@@ -1,5 +1,7 @@
+import { resolveSecurity, type SecurityPolicy } from '../security/policy.js';
+import { unlockReport, validateReport, redactReport, type PublicStamp } from '../security/envelope.js';
+import type { StampResult } from '../core/types.js';
 export type EstamperPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'custom';
-
 export interface MountEstamperOptions {
   stamp: string;
   target?: Element | string;
@@ -9,12 +11,12 @@ export interface MountEstamperOptions {
   details?: Record<string, unknown>;
   commitUrl?: string;
   jsonUrl?: string;
-  /** Unique DOM id for the root element. Defaults to 'estamper-root'.
-   *  If an element with this id already exists it is removed before mounting,
-   *  preventing duplicates on hot-reload or React re-renders. */
   rootId?: string;
+  payload?: PublicStamp;
+  security?: Partial<SecurityPolicy>;
+  /** Must fetch details from your authenticated server on EVERY open. Never embed them in the callback. */
+  loadAuthorizedReport?: () => Promise<StampResult>;
 }
-
 const css = `
 @keyframes estamper-fade-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .estamper{position:fixed;z-index:2147483647;font:12px/1.4 system-ui,sans-serif;color:#f8fafc}
@@ -33,142 +35,115 @@ const css = `
 .estamper__close{float:right;margin-left:8px}
 `;
 
-function ensureStyle(doc: Document): void {
-  if (doc.getElementById('estamper-style')) return;
-  const style = doc.createElement('style');
-  style.id = 'estamper-style';
-  style.textContent = css;
-  doc.head.append(style);
-}
-
+const controllers = new WeakMap<Element, { open: () => void; close: () => void }>();
 export async function copyStamp(stamp: string, nav?: Navigator): Promise<string> {
-  const targetNavigator = nav ?? (typeof navigator === 'undefined' ? undefined : navigator);
-  await targetNavigator?.clipboard?.writeText?.(stamp);
+  const target = nav ?? globalThis.navigator;
+  if (!target?.clipboard?.writeText) throw new Error('Clipboard unavailable');
+  await target.clipboard.writeText(stamp);
   return stamp;
 }
-
-function resolveTarget(target?: Element | string): { element: Element | null; selector?: string } {
-  if (typeof target === 'string') {
-    return { element: document.querySelector(target), selector: target };
-  }
-  return { element: target ?? document.body };
-}
-
-function label(value: unknown, labels: Record<string, string>): string {
-  return typeof value === 'string' ? (labels[value] ?? value) : String(value ?? '');
-}
-
-function appendLine(target: Element, name: string, value: unknown): void {
-  if (value === undefined || value === '') return;
-  target.append(`${name}: ${String(value)}\n`);
-}
-
-/** Programmatically open the Estamper details panel.
- *
- *  Looks up the panel by `rootId` (default `'estamper-root'`) and sets
- *  `data-open="true"` on it, exactly as clicking the badge does.
- *  Call this from menu items, footer buttons, keyboard shortcuts, etc.
- *
- *  @param rootId - The id of the mounted root element (matches `MountEstamperOptions.rootId`).
- *  @param doc    - Defaults to `globalThis.document`.
- *  @returns `true` if the element was found and toggled, `false` otherwise.
- */
 export function openEstamperDetails(rootId = 'estamper-root', doc: Document = globalThis.document): boolean {
-  const root = doc?.getElementById(rootId);
-  if (!root) return false;
-  root.dataset.open = 'true';
-  return true;
+  const controller = controllers.get(doc?.getElementById(rootId)!);
+  controller?.open();
+  return Boolean(controller);
 }
-
-/** Programmatically close the Estamper details panel. */
 export function closeEstamperDetails(rootId = 'estamper-root', doc: Document = globalThis.document): boolean {
-  const root = doc?.getElementById(rootId);
-  if (!root) return false;
-  root.dataset.open = 'false';
-  return true;
+  const controller = controllers.get(doc?.getElementById(rootId)!);
+  controller?.close();
+  return Boolean(controller);
 }
-
 export function mountEstamper(options: MountEstamperOptions): HTMLElement {
-  if (!options.stamp || options.stamp.length > 512) {
-    throw new Error('Estamper requires a non-empty stamp up to 512 characters.');
-  }
-  const { element: target, selector: targetSelector } = resolveTarget(options.target);
-  if (!target) {
-    throw new Error(targetSelector ? `Estamper target was not found: ${targetSelector}` : 'Estamper target was not found.');
-  }
+  const security = resolveSecurity(options.payload?.security ?? options.security);
+  if (!options.stamp || options.stamp.length > 512) throw new Error('Estamper requires a non-empty stamp up to 512 characters');
+  if (security.access !== 'min' && (options.details || options.commitUrl || options.jsonUrl || options.payload?.report)) throw new Error('Protected details must not be embedded in browser options');
+  if (security.access === 'max' && options.payload?.sealed) throw new Error('Backend access must not embed a sealed report');
+  const target = typeof options.target === 'string' ? document.querySelector(options.target) : options.target ?? document.body;
+  if (!target) throw new Error('Estamper target was not found');
   const doc = target.ownerDocument;
-  ensureStyle(doc);
-
-  // Deduplication: remove any existing widget with the same id before mounting.
+  if (!doc.getElementById('estamper-style')) {
+    const style = doc.createElement('style'); style.id = 'estamper-style';
+    style.textContent = css + '\n.estamper button,.estamper input,.estamper a{min-height:44px;box-sizing:border-box}.estamper__panel{max-height:70vh;overflow:auto}.estamper input{max-width:100%;display:block}.estamper__close{min-width:44px}@media(prefers-reduced-motion:reduce){.estamper[data-open="true"] .estamper__panel{animation:none}}';
+    doc.head.append(style);
+  }
   const rootId = options.rootId ?? 'estamper-root';
   const existing = doc.getElementById(rootId);
-  if (existing) existing.remove();
-
-  const root = doc.createElement('div');
-  root.id = rootId;
-  root.className = 'estamper';
-  root.dataset.position = options.position ?? 'bottom-right';
-  root.dataset.theme = options.theme ?? 'dark';
-  root.dataset.open = 'false';
-
-  const badge = doc.createElement('button');
-  badge.className = 'estamper__badge';
-  badge.type = 'button';
-  badge.textContent = options.stamp;
-
-  const panel = doc.createElement('div');
-  panel.className = 'estamper__panel';
-  const close = doc.createElement('button');
-  close.className = 'estamper__close';
-  close.type = 'button';
-  close.textContent = '×';
-  const details = doc.createElement('div');
-  const data = options.details ?? {};
-  const title = doc.createElement('p');
-  title.className = 'estamper__panel-title';
-  title.textContent = 'Estamper build';
-  details.append(title, `Stamp:\n${options.stamp}\n\n`);
-  appendLine(details, 'Environment', label(data.env, { prd: 'production', pre: 'preview', dev: 'development', stg: 'staging' }));
-  appendLine(details, 'Platform', label(data.cloud, { ghp: 'GitHub Pages', vcl: 'Vercel', ntl: 'Netlify', fb: 'Firebase', loc: 'local' }));
-  appendLine(details, 'Commit', data.commit);
-  appendLine(details, 'Branch', data.branch);
-  appendLine(details, 'Actor', data.user);
-  appendLine(details, 'Built', [data.date, data.time].filter(Boolean).join(' '));
-  appendLine(details, 'Dirty', data.dirty);
-  const actions = doc.createElement('div');
-  actions.className = 'estamper__actions';
-  const copy = doc.createElement('button');
-  copy.className = 'estamper__action';
-  copy.type = 'button';
-  copy.textContent = 'Copy';
-  copy.addEventListener('click', () => void copyStamp(options.stamp));
-  actions.append(copy);
-  if (options.commitUrl) {
-    const commit = doc.createElement('a');
-    commit.className = 'estamper__action';
-    commit.href = options.commitUrl;
-    commit.textContent = 'Open commit';
-    actions.append(commit);
+  if (existing) { controllers.get(existing)?.close(); existing.remove(); }
+  const root = doc.createElement('div'); root.id = rootId; root.className = 'estamper';
+  root.dataset.position = options.position ?? 'bottom-right'; root.dataset.theme = options.theme ?? 'dark'; root.dataset.open = 'false';
+  const button = (text: string) => { const b = doc.createElement('button'); b.type = 'button'; b.className = 'estamper__action'; b.textContent = text; return b; };
+  const badge = button(options.payload?.stamp ?? options.stamp); badge.className = 'estamper__badge';
+  badge.setAttribute('aria-expanded', 'false'); badge.setAttribute('aria-controls', `${rootId}-panel`);
+  const panel = doc.createElement('section'); panel.className = 'estamper__panel'; panel.id = `${rootId}-panel`; panel.setAttribute('aria-label', 'Estamper build');
+  const close = button('×'); close.className = 'estamper__close'; close.setAttribute('aria-label', 'Close Estamper');
+  const content = doc.createElement('div');
+  const status = doc.createElement('p'); status.setAttribute('role', 'status');
+  panel.append(close, content, status); root.append(badge, panel); target.append(root);
+  let generation = 0;
+  let returnFocus: Element | null = null;
+  function lock() {
+    generation++; root.dataset.open = 'false'; badge.setAttribute('aria-expanded', 'false');
+    content.replaceChildren(); status.textContent = '';
+    const focus = returnFocus as HTMLElement | null;
+    (focus?.isConnected && focus !== doc.body ? focus : badge).focus();
   }
-  if (options.jsonUrl) {
-    const json = doc.createElement('a');
-    json.className = 'estamper__action';
-    json.href = options.jsonUrl;
-    json.textContent = 'View JSON';
-    actions.append(json);
+  function render(report: StampResult) {
+    report = redactReport(report, security, options.payload?.stamp ?? options.stamp);
+    content.replaceChildren(); status.textContent = '';
+    const pre = doc.createElement('div'); pre.className = 'estamper__report';
+    const labels: Record<string, string> = { cloud: 'Platform', env: 'Environment', commit: 'Commit', branch: 'Branch', user: 'Actor', date: 'Date', time: 'Time', dirty: 'Dirty' };
+    const lines = [`Stamp: ${report.stamp}`];
+    for (const [key, label] of Object.entries(labels)) {
+      if (Object.hasOwn(report.parts, key)) {
+        const value = report.parts[key as keyof typeof report.parts];
+        lines.push(`${label}: ${key === 'cloud' ? ({ fb: 'Firebase', ghp: 'GitHub Pages' } as Record<string, string>)[String(value)] ?? value : value}`);
+      }
+    }
+    const text = lines.join('\n'); pre.textContent = text; content.append(pre);
+    if (security.exports !== 'max') {
+      const actions = doc.createElement('div'); actions.className = 'estamper__actions';
+      const copy = button('Copy report'); copy.onclick = () => {
+        const current = generation;
+        void copyStamp(text).then(() => { if (generation === current) status.textContent = 'Copied'; }, () => { if (generation === current) status.textContent = 'Clipboard unavailable; select the report to copy'; });
+      }; actions.append(copy);
+      function download(name: string, body: string, type: string) {
+        const url = URL.createObjectURL(new Blob([body], { type })); const a = doc.createElement('a');
+        a.href = url; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+      const txt = button('Download TXT'); txt.onclick = () => download('estamper.txt', text, 'text/plain'); actions.append(txt);
+      if (security.exports === 'min') { const json = button('Download JSON'); json.onclick = () => download('estamper.json', JSON.stringify(report, null, 2), 'application/json'); actions.append(json); }
+      content.append(actions);
+    }
   }
-  details.append(actions);
-  panel.append(close, details);
-
-  badge.addEventListener('click', () => {
-    root.dataset.open = root.dataset.open === 'true' ? 'false' : 'true';
-    if (options.copyOnClick !== false) void copyStamp(options.stamp);
-  });
-  close.addEventListener('click', () => {
-    root.dataset.open = 'false';
-  });
-
-  root.append(badge, panel);
-  target.append(root);
+  function open() {
+    if (root.dataset.open === 'true') return;
+    returnFocus = doc.activeElement; root.dataset.open = 'true'; badge.setAttribute('aria-expanded', 'true');
+    content.replaceChildren(); status.textContent = ''; const current = ++generation;
+    if (security.access === 'min') {
+      render(options.payload?.report ?? { stamp: options.stamp, parts: { mode: 'emoji', ...options.details } } as StampResult); close.focus(); return;
+    }
+    if (security.access === 'max') {
+      status.textContent = 'Authorizing…'; close.focus();
+      if (!options.loadAuthorizedReport) { status.textContent = 'Authenticated report service is not configured'; return; }
+      void Promise.resolve().then(() => options.loadAuthorizedReport!()).then(report => {
+        if (generation === current && root.isConnected) render(report);
+      }).catch(() => { if (generation === current) status.textContent = 'Access denied or report unavailable'; }); return;
+    }
+    if (!options.payload?.sealed) { status.textContent = 'Password-protected report is not configured'; close.focus(); return; }
+    const form = doc.createElement('form'); const label = doc.createElement('label'); label.textContent = 'Estamper password';
+    const input = doc.createElement('input'); input.type = 'password'; input.autocomplete = 'current-password'; input.maxLength = 1024; input.required = true;
+    label.append(input); const submit = button('Unlock'); submit.type = 'submit'; form.append(label, submit); content.append(form); input.focus();
+    form.onsubmit = async event => {
+      event.preventDefault(); if (submit.disabled) return;
+      submit.disabled = true; status.textContent = 'Unlocking…'; const password = input.value; input.value = '';
+      try {
+        const report = await unlockReport(options.payload!, password);
+        if (generation === current && root.isConnected) render(report);
+      } catch { if (generation === current) { status.textContent = 'Unable to unlock report'; input.focus(); } }
+      finally { submit.disabled = false; }
+    };
+  }
+  controllers.set(root, { open, close: lock });
+  badge.onclick = () => root.dataset.open === 'true' ? lock() : open(); close.onclick = lock;
+  root.addEventListener('keydown', event => { if (event.key === 'Escape' && root.dataset.open === 'true') { event.preventDefault(); lock(); } });
   return root;
 }

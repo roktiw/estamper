@@ -6,7 +6,9 @@ import { loadConfig } from '../config/loadConfig.js';
 import { resolveStampOptions } from '../config/resolveStampOptions.js';
 import { generateStamp } from '../core/generateStamp.js';
 import { getGitInfo } from '../git/getGitInfo.js';
-import { writeHtml, writeJs, writeJson } from './output.js';
+import { mkdir } from 'node:fs/promises';
+import { dirname } from 'node:path';
+import { buildPublicStamp, checkRelease } from '../security/build.js';
 
 function argValue(args: string[], name: string): string | undefined {
   const index = args.indexOf(name);
@@ -22,10 +24,8 @@ function help(): void {
 
 Usage:
   estamper init
-  estamper generate [--config estamper.config.yml] [--out public/estamper.json] [--js dist/estamper.js] [--html dist/estamper.html] [--seed value]
+  estamper generate [--config estamper.config.yml] [--js dist/estamper.js] [--seed value]
   estamper print [--config estamper.config.yml]
-  estamper json [--config estamper.config.yml]
-  estamper html --out public/estamper.html
   estamper validate-config [--config estamper.config.yml]
 `);
 }
@@ -33,12 +33,13 @@ Usage:
 async function buildStamp(args: string[]) {
   const config = await loadConfig(argValue(args, '--config'));
   const git = getGitInfo(config.commit.length);
-  if (config.validation.requireGit && git.commit === 'unknown') {
+  if (config.validation.requireGit && (git.commit === 'unknown' || /^0+$/.test(git.commit))) {
     throw new Error('Invalid Estamper runtime: git metadata is required but unavailable.');
   }
-  if (config.validation.requireCommit && git.commit === 'unknown') {
+  if (config.validation.requireCommit && (git.commit === 'unknown' || /^0+$/.test(git.commit))) {
     throw new Error('Invalid Estamper runtime: commit metadata is required but unavailable.');
   }
+  checkRelease(config.security, git);
   return { config, stamp: generateStamp(resolveStampOptions(config, git, argValue(args, '--seed'))) };
 }
 
@@ -51,7 +52,7 @@ async function main(args: string[]): Promise<void> {
 
   if (command === 'init') {
     const out = argValue(args, '--out') ?? 'estamper.config.yml';
-    await writeFile(out, YAML.stringify(defaultConfig), { flag: has(args, '--force') ? 'w' : 'wx' });
+    await writeFile(out, out.endsWith('.json') ? JSON.stringify(defaultConfig, null, 2) : YAML.stringify(defaultConfig), { flag: has(args, '--force') ? 'w' : 'wx' });
     console.log(`Created ${out}`);
     return;
   }
@@ -63,23 +64,22 @@ async function main(args: string[]): Promise<void> {
   }
 
   const { config, stamp } = await buildStamp(args);
+  const payload = await buildPublicStamp(stamp, config.security);
   if (command === 'print') {
-    console.log(stamp.stamp);
+    console.log(payload.stamp);
     return;
   }
   if (command === 'json') {
-    console.log(JSON.stringify(stamp, null, 2));
-    return;
+    throw new Error('Raw JSON output removed; use generate --js with protected access');
   }
-  if (command === 'html') {
-    await writeHtml(argValue(args, '--out') ?? config.output.htmlSnippet, stamp);
-    return;
-  }
+  if (command === 'html') throw new Error('Inline HTML export removed; load the generated JS module');
   if (command === 'generate') {
-    await writeJson(argValue(args, '--out') ?? config.output.json, stamp);
-    if (argValue(args, '--js')) await writeJs(argValue(args, '--js') ?? config.output.js, stamp);
-    if (argValue(args, '--html')) await writeHtml(argValue(args, '--html') ?? config.output.htmlSnippet, stamp);
-    console.log(stamp.stamp);
+    if (argValue(args, '--out') || has(args, '--html')) throw new Error('Public JSON/HTML output removed; use --js');
+    const path = argValue(args, '--js') ?? config.output.js;
+    if (!path.endsWith('.js')) throw new Error('Protected output must use a .js extension');
+    await mkdir(dirname(path), { recursive: true });
+    await writeFile(path, `export default ${JSON.stringify(payload).replaceAll('<', '\\u003c')};\n`, 'utf8');
+    console.log(`Created protected build module: ${path}`);
     return;
   }
 

@@ -1,196 +1,94 @@
 # Estamper
 
-Tiny visible build stamps for web apps and games.
+Human-readable build stamps with protected diagnostics. Version **0.3.0** changes the default from public metadata to password-encrypted details.
 
-![Estamper demo](./docs/demo.svg)
+## Start
 
-```text
-stg-az-🍉-🛠️-silver-river-2026-06-28-04:12-roktiw@a1b2c3d
-```
+Requires Node 22.12 or later. The public distribution is the GitHub Release tarball; npm registry publication is not available yet.
 
-When QA sends a screenshot, you instantly know the exact build, commit, deploy time and actor.
-
-```text
-STG-AZ-WM-TL-silver-river-2026-06-28-04:12-roktiw@a1b2c3d
-```
-
-Estamper gives every deploy a tiny human-readable tattoo: env, cloud, emoji or ASCII tokens, words, timestamp, user, and commit.
-
-## Quick start
-
-```bash
-npm install -D estamper
+```sh
+npm install -D https://github.com/roktiw/estamper/releases/download/v0.3.0/estamper-0.3.0.tgz
 npx estamper init
-npx estamper generate --out public/estamper.json
+# Supply ESTAMPER_PASSWORD from your local/CI secret store (16–1024 characters).
+npx estamper generate --js public/estamper.js
 ```
-
-## Website
-
-The documentation site is an Astro app with a custom landing page at `/`, Starlight docs under `/docs`, an interactive playground at `/playground`, examples at `/examples`, changelog at `/changelog`, and LLM-first text files at `/llms.txt` and `/llms-full.txt`.
-
-```bash
-npm ci
-npm run site:dev
-npm run check
-npm test
-npm run site:build
-```
-
-The site dogfoods Estamper with `estamper.config.yml` and `public/estamper.json`; deploy workflows regenerate that file before building.
 
 ```js
 import { mountEstamper } from 'estamper/browser';
-import stamp from './estamper.json' assert { type: 'json' };
-
-mountEstamper({ stamp: stamp.stamp, position: 'bottom-right' });
+import payload from './estamper.js';
+mountEstamper({ stamp: payload.stamp, payload });
 ```
 
-## Before / after
+The chip shows an opaque build identity. Clicking it requests the password; the report is decrypted only after success. Close/Escape discards the rendered report and locks it again. No password, key or unlocked report is stored in localStorage/sessionStorage. A missing password fails the build; a missing report remains locked.
 
-Before:
+## Settings panel and YAML / JSON
 
-```text
-QA: "Bug still happens."
-Dev: "Which build?"
-QA: "No idea."
-```
-
-After, the screenshot includes:
-
-```text
-stg-az-🍉-🛠️-silver-river-2026-06-28-04:12-roktiw@a1b2c3d
-```
-
-You can see the deploy time, commit, actor, branch/dirty state, and exactly which build is on screen without opening DevTools.
-
-## Why not just show a commit hash?
-
-A hash alone is hard to read from screenshots, easy to mix up between staging/prod, and misses useful context. Estamper keeps the stamp visible, copyable, and human-readable.
-
-## Core API
-
-```js
-import { generateStamp } from 'estamper';
-
-const result = generateStamp({
-  mode: 'emoji',
-  env: 'stg',
-  cloud: 'az',
-  words: ['silver', 'river', 'melon', 'orbit'],
-  emojis: ['🍉', '🛠️', '🚀', '🐶'],
-  ascii: ['WM', 'TL', 'RX', 'DG'],
-  user: 'roktiw',
-  commit: 'a1b2c3d',
-  date: new Date(),
-  seed: 'repeatable-build',
-});
-```
-
-Default stamps follow:
-
-```text
-[env]-[cloud]-[token1]-[token2]-[word1]-[word2]-[yyyy-mm-dd]-[hh:mm]-[user]@[commit]
-```
-
-`seed` makes token selection deterministic; without it, token selection is derived from the commit. Use `mode: 'auto'` with `emojiSupported: false` to produce the ASCII fallback with the same format placeholders.
-
-## CLI
-
-```bash
-estamper --help
-estamper init
-estamper validate-config --config estamper.config.yml
-estamper generate --config estamper.config.yml --out public/estamper.json
-estamper generate --out public/estamper.json --js public/estamper.js --html public/estamper.html
-estamper print
-estamper json
-estamper html --out public/estamper.html
-```
-
-The CLI reads `GITHUB_SHA`, `GITHUB_ACTOR`, and `GITHUB_REF_NAME` in GitHub Actions. Outside CI it falls back to local `git` and `git config user.name`; if git is unavailable, safe `unknown` values are used.
-
-## Config
-
-The default config lives in `estamper.config.yml`. YAML and JSON config files are supported.
-
-Important fields:
-
-- `mode`: `emoji`, `ascii`, or `auto`
-- `env`: explicit token or auto-detection from `VITE_ENV`, `NODE_ENV`, or `DEPLOY_ENV`
-- `cloud`: explicit provider or auto-detection from deployment environment variables such as `VERCEL`, `NETLIFY`, `AWS_REGION`, or `AZURE_CLIENT_ID`
-- `format`: token template, e.g. `{env}-{cloud}-{token1}-{token2}-{word1}-{word2}-{date}-{time}-{user}@{commit}`
-- `tokens.count`, `words.count`: 1–4 generated token/word segments
-- `date.format`: `yyyy-mm-dd`, `yy-mm-dd`, `mmdd`, `yyyymmdd`, or `iso-date`
-- `time.format`: `hh:mm`, `hh:mm:ss`, `hhmm`, `hhmmss`, or `unix`
-- `words.allow`, `emojis.allow`, `ascii.allow`: dictionaries used by the generator
-- `git.commitLength`: short commit length
-- `git.includeBranch`: opt-in branch suffix support; disabled by default
-- `git.includeDirty`: adds `~` to dirty local commits
-- `badge.position`: `top-left`, `top-right`, `bottom-left`, `bottom-right`, or `custom`
-- `output`: default output paths
-
-Config is validated with clear errors and capped token lists to avoid oversized output.
-
-## Browser badge
-
-```js
-import { mountEstamper } from 'estamper/browser';
-
-mountEstamper({
-  stamp: 'stg-az-🍉-🛠️-silver-river-2026-06-28-04:12-roktiw@a1b2c3d',
-  position: 'bottom-right',
-  theme: 'dark',
-});
-```
-
-The widget has no framework dependency, renders with `textContent` instead of unsafe HTML injection, supports copy-on-click, and includes a small details panel.
-Pass `target: '#selector'` with `position: 'custom'` to mount the badge inside a specific element instead of a fixed viewport corner.
-
-## Vite
-
-```js
-import { defineConfig } from 'vite';
-import { estamperVite } from 'estamper/vite';
-
-export default defineConfig({
-  plugins: [
-    estamperVite({
-      config: './estamper.config.yml',
-      inject: true,
-      globalName: '__ESTAMPER__',
-      meta: true,
-    }),
-  ],
-});
-```
-
-## GitHub Actions
-
-Copy a template from `.github/workflow-templates/`, or add:
+Run `npm ci && npm run site:dev`, then open `/settings/`. The panel has independent min/mid/max controls, presets, a complete configuration editor, validated file import and YAML/JSON downloads. It runs locally in the browser and never uploads your configuration. The playground also exports the same configuration schema. No secrets are accepted in config.
 
 ```yaml
-- run: npx estamper generate --out public/estamper.json
+security:
+  access: mid
+  disclosure: mid
+  exports: mid
+  release: mid
 ```
 
-## Dogfooding
+| Control | min | mid (default) | max |
+| --- | --- | --- | --- |
+| Access | Explicit public details | Password-encrypted report | Authenticated backend; no bundled report |
+| Disclosure | Full report | Remove actor/branch, replace original stamp | Build identity only |
+| Exports | TXT + JSON after unlock | TXT after unlock | No export controls |
+| Release | Local experimentation | Require Git commit | Require Git commit and clean working tree |
 
-The Estamper website is stamped by Estamper.
+Min is for deliberate public demos / YOLO experimentation. Max is a building block for an enterprise integration, not a Zero Trust certification. Export controls do not prevent an authorized reader from copying data. Disclosure policy is applied before encryption, so redacted fields never enter the artifact.
 
-Live stamp JSON:
+## Production boundary
 
-https://estamper.dev/estamper.json
+No automatic `estamper.json` output in production builds. CLI `json`, `html` and `generate --out` are removed. Vite defaults `emitAsset` to false, rejects legacy JSON output during builds, and checks public directories for stale metadata/config. It injects an external script compatible with a same-origin script CSP. Integrators must also run `node scripts/check-public-artifact.mjs <output>` in this repository (or their equivalent final artifact inspection). Arbitrary files manually copied under other names are outside this guard.
 
-## Examples
+```js
+import { estamperVite } from 'estamper/vite';
+export default { plugins: [estamperVite({ inject: true, meta: true })] };
+// Browser: mountEstamper({ stamp: window.__ESTAMPER__.stamp, payload: window.__ESTAMPER__ });
+```
 
-- `examples/basic-html` — plain HTML badge
-- `examples/vite` — Vite plugin setup
-- `examples/panel` — static config panel that previews and exports YAML/JSON
+Password delivery uses AES-256-GCM with random salt/nonce and PBKDF2-HMAC-SHA256 (600,000 iterations). Anyone with the artifact can attempt offline password guessing: use a strong unique generated passphrase. Password rotation requires a new artifact; old ciphertext cannot be revoked. Do not use shared-password encryption for high-sensitivity secrets.
 
-## Security notes
+With `security.access: max`, the build publishes only an opaque identity. Configure your backend to authenticate and authorize every report request, apply the disclosure policy, rate limits, session expiry and `Cache-Control: no-store`. Do not embed report data in this callback:
 
-Estamper does not execute code from config, does not send data externally, limits config sizes and stamp length, and avoids unsafe DOM rendering for user-controlled strings.
+```js
+mountEstamper({
+  stamp: payload.stamp,
+  payload,
+  loadAuthorizedReport: async () => {
+    const response = await fetch('/internal/build-report', {
+      credentials: 'same-origin', cache: 'no-store',
+    });
+    if (!response.ok) throw new Error('Denied');
+    return response.json();
+  },
+});
+```
 
-## License
+The backend is supplied by the host application; this static library does not create an identity provider or enforce server permissions. A browser callback returning true is not authentication. A protected widget rejects plaintext `details`, `commitUrl`, `jsonUrl` and embedded reports. Plain `stamp` is always public; never pass sensitive fields there.
 
-MIT © [Wiktor Świątkowski](https://github.com/roktiw)
+## APIs and compatibility
 
+`generateStamp()` remains the low-level raw generator. `estamper/config` exports `loadConfig`, `parseConfig`, `normalizeConfig`, `validateConfig` and policy helpers. JSON and YAML share validation (128 KiB cap, no aliases, bounded nesting, prototype-key rejection). Existing formatting/token options remain; legacy public widgets need explicit `security: { access: 'min' }`. CJS consumers remain supported for core, config and browser entry points. Vite/CLI are ESM.
+
+`openEstamperDetails()` uses exactly the same protected flow as chip clicks. `closeEstamperDetails()` locks it. Clipboard failure is reported, links are not constructed from untrusted report fields, and all displayed values use text nodes.
+
+## Development and release
+
+```sh
+npm ci
+npm run security:check
+npm run build
+npm run site:build
+npm run test:e2e -- --headed
+npm pack
+```
+
+CI uses read-only permissions, pinned action SHAs, dependency audit, tests, artifact inspection and browser acceptance. Pages deployment permissions exist only on its deployment job. See [SECURITY.md](SECURITY.md), [RELEASES.md](RELEASES.md), and [CHANGELOG.md](CHANGELOG.md). A GitHub Release is separate from npm publication and website deployment.
+
+MIT © Wiktor Świątkowski

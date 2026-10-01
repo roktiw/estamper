@@ -18,4 +18,4 @@ export default defineConfig({
 });
 ```
 
-The plugin can write JSON output and expose a global value for app code or badges.
+The plugin emits an external protected JS payload, never raw JSON in a production build. Supply ESTAMPER_PASSWORD through the build secret store. Use the global as mountEstamper({ stamp: window.__estamper__.stamp, payload: window.__estamper__ }).

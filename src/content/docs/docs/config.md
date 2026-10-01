@@ -24,7 +24,7 @@ badge:
   position: bottom-right
   copyOnClick: true
 output:
-  json: public/estamper.json
+  js: public/estamper.js
   js: public/estamper.js
   htmlSnippet: public/estamper.html
 ```
