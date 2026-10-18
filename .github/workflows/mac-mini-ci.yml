@@ -64,8 +64,19 @@ jobs:
         run: |
           set -euo pipefail
           npm run test:e2e -- --headed
-      - name: Preserve test reports
+      - name: Preserve reports on this Mac
         if: always()
+        run: |
+          set -euo pipefail
+          destination="$HOME/.local/share/github-ci-reports/$GITHUB_REPOSITORY/$GITHUB_RUN_ID"
+          mkdir -p "$destination"
+          printf '%s\n' "$GITHUB_SHA" > "$destination/source.sha"
+          for item in mac-ci-tests.xml test-results playwright-report; do
+            if [[ -e "$item" ]]; then cp -R "$item" "$destination/"; fi
+          done
+          echo "Local reports: $destination" >> "$GITHUB_STEP_SUMMARY"
+      - name: Optional GitHub artifact upload
+        if: always() && vars.MAC_CI_UPLOAD_ARTIFACTS == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: mac-mini-ci-${{ github.run_id }}
